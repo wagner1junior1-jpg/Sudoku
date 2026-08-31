@@ -7,7 +7,8 @@ import {
   HelpCircle,
   Palette,
   Award,
-  Home
+  Home,
+  Download
 } from "lucide-react";
 import { DifficultyLevel, ThemeId } from "../types";
 import { DIFFICULTY_CONFIG } from "../utils/sudokuEngine";
@@ -16,6 +17,7 @@ import { THEMES } from "../utils/themes";
 interface HeaderProps {
   difficulty: DifficultyLevel;
   themeId: ThemeId;
+  isPWAInstalled?: boolean;
   onGoHome: () => void;
   onOpenNewGame: () => void;
   onOpenLeaderboard: () => void;
@@ -24,11 +26,14 @@ interface HeaderProps {
   onOpenSettings: () => void;
   onOpenHowToPlay: () => void;
   onOpenQuickTheme: () => void;
+  onOpenPWAInstall?: () => void;
+  onOpenFeedback?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   difficulty,
   themeId,
+  isPWAInstalled,
   onGoHome,
   onOpenNewGame,
   onOpenLeaderboard,
@@ -36,7 +41,9 @@ export const Header: React.FC<HeaderProps> = ({
   onOpenHistory,
   onOpenSettings,
   onOpenHowToPlay,
-  onOpenQuickTheme
+  onOpenQuickTheme,
+  onOpenPWAInstall,
+  onOpenFeedback
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
   const diffInfo = DIFFICULTY_CONFIG[difficulty];
@@ -66,6 +73,19 @@ export const Header: React.FC<HeaderProps> = ({
 
       {/* Action Navigation Buttons */}
       <div className="flex items-center gap-1">
+        {/* PWA Install Shortcut if available */}
+        {!isPWAInstalled && onOpenPWAInstall && (
+          <button
+            id="btn-header-pwa-install"
+            onClick={onOpenPWAInstall}
+            className="p-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 border border-blue-500/30 transition active:scale-95 flex items-center justify-center cursor-pointer shadow-sm"
+            title="Instalar Aplicativo PWA (Offline)"
+            aria-label="Instalar App"
+          >
+            <Download className="w-3.5 h-3.5 animate-bounce" />
+          </button>
+        )}
+
         {/* Quick Theme Switcher Shortcut */}
         <button
           id="btn-quick-theme"
@@ -138,4 +158,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

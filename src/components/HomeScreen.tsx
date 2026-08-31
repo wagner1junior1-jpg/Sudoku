@@ -4,7 +4,6 @@ import {
   RotateCcw,
   Trophy,
   BarChart2,
-  Award,
   Settings,
   HelpCircle,
   Palette,
@@ -12,7 +11,8 @@ import {
   ChevronRight,
   Sparkles,
   Clock,
-  Flame
+  Download,
+  Plus
 } from "lucide-react";
 import {
   DifficultyLevel,
@@ -30,6 +30,7 @@ interface HomeScreenProps {
   themeId: ThemeId;
   savedGame: ActiveGameState | null;
   gameHistory: GameHistoryItem[];
+  isPWAInstalled?: boolean;
   onStartNewGame: () => void;
   onResumeGame: () => void;
   onOpenNewGameModal: () => void;
@@ -39,6 +40,8 @@ interface HomeScreenProps {
   onOpenSettings: () => void;
   onOpenHowToPlay: () => void;
   onOpenQuickTheme: () => void;
+  onOpenPWAInstall?: () => void;
+  onOpenFeedback?: () => void;
   onUpdateProfile: (newProfile: UserProfile) => void;
 }
 
@@ -47,6 +50,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   themeId,
   savedGame,
   gameHistory,
+  isPWAInstalled,
   onResumeGame,
   onOpenNewGameModal,
   onOpenLeaderboard,
@@ -55,6 +59,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenSettings,
   onOpenHowToPlay,
   onOpenQuickTheme,
+  onOpenPWAInstall,
+  onOpenFeedback,
   onUpdateProfile
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
@@ -97,6 +103,33 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {/* Developer Feedback / Bug Report (+) Button */}
+          {onOpenFeedback && (
+            <button
+              onClick={onOpenFeedback}
+              className="p-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 hover:bg-emerald-500/25 transition active:scale-95 cursor-pointer shadow-sm flex items-center justify-center text-emerald-400"
+              title="Sugestões ou Erros? Fale com o desenvolvedor (+)"
+              aria-label="Fale com o desenvolvedor (+)"
+            >
+              <Plus className="w-4 h-4 stroke-[3]" />
+            </button>
+          )}
+
+          {/* PWA Install Button Shortcut if available */}
+          {!isPWAInstalled && onOpenPWAInstall && (
+            <button
+              onClick={onOpenPWAInstall}
+              className={`p-2 rounded-xl bg-blue-500/15 border border-blue-500/30 hover:bg-blue-500/25 transition active:scale-95 cursor-pointer shadow-sm flex items-center gap-1 text-blue-400`}
+              title="Instalar Aplicativo PWA"
+              aria-label="Instalar App"
+            >
+              <Download className="w-4 h-4 animate-bounce" />
+              <span className="text-[10px] font-bold uppercase tracking-wider hidden sm:inline">
+                Instalar
+              </span>
+            </button>
+          )}
+
           {/* Quick Theme Switcher */}
           <button
             onClick={onOpenQuickTheme}
@@ -120,13 +153,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </header>
 
       {/* Main Hero & Branding Area */}
-      <main className="flex-1 flex flex-col items-center justify-center gap-3.5 my-auto py-2 text-center">
+      <main className="flex-1 flex flex-col items-center justify-center gap-3 my-auto py-1 text-center">
         {/* Animated Visual Board Artwork */}
         <div className="relative group cursor-pointer" onClick={onOpenNewGameModal}>
           <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-amber-400 rounded-3xl blur-md opacity-35 group-hover:opacity-60 transition duration-300 animate-pulse" />
           
           <div
-            className={`relative w-28 h-28 sm:w-32 sm:h-32 rounded-3xl ${currentTheme.cardBg} border-2 border-blue-500/40 p-2 shadow-2xl flex flex-col justify-between overflow-hidden`}
+            className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl ${currentTheme.cardBg} border-2 border-blue-500/40 p-2 shadow-2xl flex flex-col justify-between overflow-hidden`}
           >
             {/* 3x3 Mini Grid Art */}
             <div className="grid grid-cols-3 grid-rows-3 gap-1 h-full w-full">
@@ -185,15 +218,73 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </span>
         </div>
 
+        {/* PWA Install Promotion Banner */}
+        {!isPWAInstalled && onOpenPWAInstall && (
+          <button
+            onClick={onOpenPWAInstall}
+            className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-blue-600/15 via-indigo-600/15 to-purple-600/15 hover:from-blue-600/25 hover:to-purple-600/25 border border-blue-500/30 flex items-center justify-between gap-2.5 transition active:scale-[0.99] cursor-pointer text-left shadow-sm group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 shrink-0 group-hover:scale-105 transition">
+                <Download className="w-4 h-4 animate-bounce" />
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                  <span>Instalar Aplicativo PWA</span>
+                  <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-blue-500/20 text-blue-400 border border-blue-500/30">
+                    Offline
+                  </span>
+                </h4>
+                <p className="text-[10px] text-slate-400 truncate">
+                  Jogue 100% offline em tela cheia no seu celular
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0 text-blue-400 text-xs font-bold">
+              <span className="hidden sm:inline">Instalar</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+        )}
+
+        {/* Developer Feedback (+) Banner */}
+        {onOpenFeedback && (
+          <button
+            onClick={onOpenFeedback}
+            className="w-full p-2.5 rounded-2xl bg-gradient-to-r from-emerald-600/15 via-teal-600/15 to-emerald-600/15 hover:from-emerald-600/25 hover:to-teal-600/25 border border-emerald-500/30 flex items-center justify-between gap-2.5 transition active:scale-[0.99] cursor-pointer text-left shadow-sm group"
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="w-8 h-8 rounded-xl bg-emerald-500/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0 group-hover:scale-105 transition font-black text-sm">
+                +
+              </div>
+              <div className="min-w-0">
+                <h4 className="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                  <span>Sugestões ou Erros?</span>
+                  <span className="text-[9px] uppercase font-black px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    WhatsApp
+                  </span>
+                </h4>
+                <p className="text-[10px] text-slate-300 truncate">
+                  Fale com o desenvolvedor direto pelo WhatsApp
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-1 shrink-0 text-emerald-400 text-xs font-bold">
+              <span className="hidden sm:inline">Contatar</span>
+              <ChevronRight className="w-4 h-4" />
+            </div>
+          </button>
+        )}
+
         {/* Clickable Achievements Card */}
         <button
           onClick={onOpenAchievements}
-          className={`w-full p-3 rounded-2xl ${currentTheme.cardBg} border shadow-md flex flex-col gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer text-left`}
+          className={`w-full p-2.5 rounded-2xl ${currentTheme.cardBg} border shadow-md flex flex-col gap-2 transition-all hover:scale-[1.01] active:scale-[0.99] cursor-pointer text-left`}
         >
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500">
-                <Trophy className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-amber-500">
+                <Trophy className="w-3.5 h-3.5" />
               </div>
               <div>
                 <h3 className="text-xs font-bold leading-tight flex items-center gap-1">
@@ -214,7 +305,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full h-2 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden p-0.5">
+          <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden p-0.5">
             <div
               className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-400 transition-all duration-500"
               style={{ width: `${completionPercent}%` }}
@@ -223,7 +314,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </button>
 
         {/* Primary Action Buttons */}
-        <div className="w-full flex flex-col gap-2.5 pt-1">
+        <div className="w-full flex flex-col gap-2 pt-1">
           {/* Continue Game Button (if active game in progress exists) */}
           {hasValidSavedGame && savedGame && (
             <button
@@ -247,7 +338,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <button
             id="btn-start-game-home"
             onClick={onOpenNewGameModal}
-            className="w-full py-3.5 px-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-xl shadow-blue-600/35 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer uppercase tracking-wider border border-blue-400/40 animate-scale-up"
+            className="w-full py-3 px-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-500 hover:from-blue-500 hover:to-indigo-500 text-white font-extrabold text-base shadow-xl shadow-blue-600/35 flex items-center justify-center gap-2 transition-all hover:scale-[1.02] active:scale-95 cursor-pointer uppercase tracking-wider border border-blue-400/40 animate-scale-up"
           >
             <Play className="w-5 h-5 fill-white" />
             <span>{hasValidSavedGame ? "Novo Jogo" : "Iniciar Jogo"}</span>

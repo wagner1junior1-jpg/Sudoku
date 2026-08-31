@@ -55,6 +55,9 @@ import { HowToPlayModal } from "./components/HowToPlayModal";
 import { QuickThemeModal } from "./components/QuickThemeModal";
 import { AchievementsModal } from "./components/AchievementsModal";
 import { AchievementToast } from "./components/AchievementToast";
+import { PWAInstallModal } from "./components/PWAInstallModal";
+import { PWAUpdateToast } from "./components/PWAUpdateToast";
+import { FeedbackModal } from "./components/FeedbackModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
 
@@ -97,10 +100,43 @@ export default function App() {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isHowToPlayOpen, setIsHowToPlayOpen] = useState(false);
   const [isQuickThemeOpen, setIsQuickThemeOpen] = useState(false);
+  const [isPWAInstallOpen, setIsPWAInstallOpen] = useState(false);
+  const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+  const [isPWAInstalled, setIsPWAInstalled] = useState(false);
   const [activeHint, setActiveHint] = useState<HintExplanation | null>(null);
   const [recentUnlockedAchievements, setRecentUnlockedAchievements] = useState<Achievement[]>([]);
   const [activeAchievementToast, setActiveAchievementToast] = useState<Achievement | null>(null);
   const [hasContinuedPastLimit, setHasContinuedPastLimit] = useState(false);
+
+  // Detect PWA installation and listen for install prompts
+  useEffect(() => {
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+
+    const handleAppInstalled = () => {
+      setIsPWAInstalled(true);
+      setDeferredPrompt(null);
+    };
+
+    const checkStandalone = () => {
+      const standalone =
+        window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator as unknown as { standalone?: boolean }).standalone === true;
+      setIsPWAInstalled(Boolean(standalone));
+    };
+
+    checkStandalone();
+    window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+    window.addEventListener("appinstalled", handleAppInstalled);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+      window.removeEventListener("appinstalled", handleAppInstalled);
+    };
+  }, []);
 
   // Sound effects sync
   useEffect(() => {
@@ -665,6 +701,7 @@ export default function App() {
           themeId={settings.theme}
           savedGame={savedGame}
           gameHistory={gameHistory}
+          isPWAInstalled={isPWAInstalled}
           onStartNewGame={() => setIsNewGameOpen(true)}
           onResumeGame={handleResumeSavedGame}
           onOpenNewGameModal={() => setIsNewGameOpen(true)}
@@ -674,6 +711,8 @@ export default function App() {
           onOpenSettings={() => setIsSettingsOpen(true)}
           onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
           onOpenQuickTheme={() => setIsQuickThemeOpen(true)}
+          onOpenPWAInstall={() => setIsPWAInstallOpen(true)}
+          onOpenFeedback={() => setIsFeedbackOpen(true)}
           onUpdateProfile={(newProfile) => {
             setUserProfile(newProfile);
             saveUserProfile(newProfile);
@@ -686,6 +725,7 @@ export default function App() {
           <Header
             difficulty={difficulty}
             themeId={settings.theme}
+            isPWAInstalled={isPWAInstalled}
             onGoHome={() => setGameStatus("home")}
             onOpenNewGame={() => setIsNewGameOpen(true)}
             onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
@@ -694,6 +734,8 @@ export default function App() {
             onOpenSettings={() => setIsSettingsOpen(true)}
             onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
             onOpenQuickTheme={() => setIsQuickThemeOpen(true)}
+            onOpenPWAInstall={() => setIsPWAInstallOpen(true)}
+            onOpenFeedback={() => setIsFeedbackOpen(true)}
           />
 
           {/* Live Timer, Mistakes, Score bar */}
@@ -868,6 +910,30 @@ export default function App() {
           onGoHome={() => setGameStatus("home")}
         />
       )}
+
+      {/* Developer Feedback / Bug Report Modal */}
+      {isFeedbackOpen && (
+        <FeedbackModal
+          themeId={settings.theme}
+          onClose={() => setIsFeedbackOpen(false)}
+        />
+      )}
+
+      {/* PWA Installation Modal */}
+      {isPWAInstallOpen && (
+        <PWAInstallModal
+          themeId={settings.theme}
+          deferredPrompt={deferredPrompt}
+          onClose={() => setIsPWAInstallOpen(false)}
+          onInstallSuccess={() => {
+            setIsPWAInstalled(true);
+            setDeferredPrompt(null);
+          }}
+        />
+      )}
+
+      {/* PWA Background Update Toast */}
+      <PWAUpdateToast />
 
       {/* Real-time Achievement Unlock Toast */}
       {activeAchievementToast && (
