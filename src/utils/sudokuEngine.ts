@@ -13,35 +13,35 @@ export const DIFFICULTY_CONFIG: Record<
 > = {
   facil: {
     label: "Fácil",
-    clues: 38,
+    clues: 48,
     multiplier: 1.0,
-    description: "Ideal para iniciantes e partidas rápidas e relaxantes.",
+    description: "Ideal para iniciantes, com pistas abundantes e resolução direta e relaxante.",
     color: "text-emerald-400 border-emerald-500/30 bg-emerald-500/10"
   },
   medio: {
     label: "Médio",
-    clues: 32,
+    clues: 38,
     multiplier: 1.5,
     description: "Equilíbrio perfeito de desafio e lógica para jogadores casuais.",
     color: "text-blue-400 border-blue-500/30 bg-blue-500/10"
   },
   dificil: {
     label: "Difícil",
-    clues: 27,
+    clues: 30,
     multiplier: 2.2,
     description: "Requer técnicas de anotações e eliminação lógica.",
     color: "text-amber-400 border-amber-500/30 bg-amber-500/10"
   },
   especialista: {
     label: "Especialista",
-    clues: 24,
+    clues: 25,
     multiplier: 3.2,
     description: "Pouquíssimas pistas iniciais. Teste rigoroso de dedução.",
     color: "text-rose-400 border-rose-500/30 bg-rose-500/10"
   },
   mestre: {
     label: "Mestre",
-    clues: 21,
+    clues: 22,
     multiplier: 4.5,
     description: "Nível supremo para mestres do Sudoku. Raciocínio profundo.",
     color: "text-purple-400 border-purple-500/30 bg-purple-500/10"
