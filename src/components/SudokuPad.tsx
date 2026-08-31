@@ -52,9 +52,51 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
       className="w-full max-w-md mx-auto flex flex-col gap-1 select-none"
     >
       {/* Mobile Ergonomic Action & Number Pad Container */}
-      <div className={`flex flex-col gap-1.5 p-1.5 sm:p-2.5 rounded-2xl ${currentTheme.cardBg} border shadow-xl`}>
-        {/* Top Actions Row: 5 Thumb Controls */}
-        <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
+      <div className={`flex flex-col gap-1.5 p-1.5 sm:p-2 rounded-2xl ${currentTheme.cardBg} border shadow-xl`}>
+        {/* Top: Large Numbers Row (1-9) */}
+        <div className="grid grid-cols-9 gap-1 pb-0.5">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+            const placedCount = numberCounts[num] || 0;
+            const isComplete = placedCount >= 9;
+            const isSelected = selectedNumber === num && inputMode === "number-first";
+
+            return (
+              <button
+                key={`numpad-${num}`}
+                id={`btn-numpad-${num}`}
+                type="button"
+                onClick={() => onNumberClick(num)}
+                disabled={isComplete}
+                className={`relative h-12 sm:h-14 rounded-xl flex flex-col items-center justify-center transition-all duration-100 cursor-pointer border ${
+                  isComplete
+                    ? "opacity-25 cursor-not-allowed bg-black/20 border-white/5 text-slate-500"
+                    : isSelected
+                    ? "scale-105 shadow-md ring-2 ring-white z-10"
+                    : `${currentTheme.buttonBg} active:scale-95 hover:brightness-110`
+                }`}
+                style={
+                  isSelected
+                    ? { backgroundColor: currentTheme.swatch?.accent || "#3b82f6", color: "#ffffff" }
+                    : {}
+                }
+                title={`Número ${num}${isComplete ? " (Completo)" : ` - restam ${9 - placedCount}`}`}
+              >
+                <span className="text-2xl sm:text-3xl font-black leading-none">{num}</span>
+                {placedCount > 0 && !isComplete && (
+                  <span className="text-[9px] sm:text-[10px] font-mono opacity-70 mt-0.5 font-extrabold leading-none">
+                    {9 - placedCount}
+                  </span>
+                )}
+                {isComplete && (
+                  <span className="text-[9px] sm:text-[10px] font-black text-emerald-400 mt-0.5 leading-none">✓</span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Bottom Actions Row: 5 Thumb Controls (Undo, Redo, Erase, Notes, Hint) */}
+        <div className="grid grid-cols-5 gap-1 sm:gap-1.5 pt-1.5 border-t border-white/10">
           {/* Undo */}
           <button
             id="btn-action-undo"
@@ -123,47 +165,6 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
             <Sparkles className="w-4 h-4 text-slate-950 fill-slate-950/20" />
             <span className="text-[10px] font-bold">Dica</span>
           </button>
-        </div>
-
-        {/* Number Pad (1-9) in Mobile Ergonomic Circular Style */}
-        <div className="grid grid-cols-9 gap-1 pt-1 border-t border-white/10">
-          {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
-            const placedCount = numberCounts[num] || 0;
-            const isComplete = placedCount >= 9;
-            const isSelected = selectedNumber === num && inputMode === "number-first";
-
-            return (
-              <button
-                key={`numpad-${num}`}
-                id={`btn-numpad-${num}`}
-                type="button"
-                onClick={() => onNumberClick(num)}
-                disabled={isComplete}
-                className={`relative aspect-square rounded-xl flex flex-col items-center justify-center transition-all duration-100 cursor-pointer border ${
-                  isComplete
-                    ? "opacity-25 cursor-not-allowed bg-black/20 border-white/5 text-slate-500"
-                    : isSelected
-                    ? "scale-105 shadow-md ring-2 ring-white"
-                    : `${currentTheme.buttonBg} active:scale-95`
-                }`}
-                style={
-                  isSelected
-                    ? { backgroundColor: currentTheme.swatch?.accent || "#3b82f6", color: "#ffffff" }
-                    : {}
-                }
-              >
-                <span className="text-xl sm:text-2xl font-black leading-none">{num}</span>
-                {placedCount > 0 && !isComplete && (
-                  <span className="text-[8px] font-mono opacity-60 mt-0.5 font-bold">
-                    {9 - placedCount}
-                  </span>
-                )}
-                {isComplete && (
-                  <span className="text-[8px] font-bold text-emerald-400 mt-0.5">✓</span>
-                )}
-              </button>
-            );
-          })}
         </div>
       </div>
 
