@@ -21,7 +21,7 @@ export interface CellData {
 
 export type BoardMatrix = CellData[][];
 
-export type GameStatus = "idle" | "playing" | "paused" | "completed" | "game_over";
+export type GameStatus = "home" | "idle" | "playing" | "paused" | "completed" | "game_over";
 
 export interface GameMoveHistory {
   row: number;

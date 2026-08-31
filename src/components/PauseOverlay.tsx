@@ -1,14 +1,15 @@
 import React from "react";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, Home } from "lucide-react";
 import { ThemeId } from "../types";
 import { THEMES } from "../utils/themes";
 
 interface PauseOverlayProps {
   themeId: ThemeId;
   onResume: () => void;
+  onGoHome?: () => void;
 }
 
-export const PauseOverlay: React.FC<PauseOverlayProps> = ({ themeId, onResume }) => {
+export const PauseOverlay: React.FC<PauseOverlayProps> = ({ themeId, onResume, onGoHome }) => {
   const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
 
   return (
@@ -25,14 +26,27 @@ export const PauseOverlay: React.FC<PauseOverlayProps> = ({ themeId, onResume })
           </p>
         </div>
 
-        <button
-          id="btn-resume-game"
-          onClick={onResume}
-          className="w-full py-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm shadow-lg shadow-indigo-600/30 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
-        >
-          <Play className="w-4 h-4 fill-white" />
-          <span>Continuar Jogo</span>
-        </button>
+        <div className="w-full flex flex-col gap-2">
+          <button
+            id="btn-resume-game"
+            onClick={onResume}
+            className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer"
+          >
+            <Play className="w-4 h-4 fill-white" />
+            <span>Continuar Jogo</span>
+          </button>
+
+          {onGoHome && (
+            <button
+              id="btn-pause-go-home"
+              onClick={onGoHome}
+              className={`w-full py-2.5 rounded-xl ${currentTheme.buttonBg} ${currentTheme.textColor} font-semibold text-xs flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer`}
+            >
+              <Home className="w-4 h-4 text-blue-400" />
+              <span>Menu Principal</span>
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

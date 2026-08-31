@@ -39,6 +39,7 @@ import { THEMES } from "./utils/themes";
 
 // Components
 import { Header } from "./components/Header";
+import { HomeScreen } from "./components/HomeScreen";
 import { StatsBar } from "./components/StatsBar";
 import { SudokuGrid } from "./components/SudokuGrid";
 import { SudokuPad } from "./components/SudokuPad";
@@ -71,7 +72,8 @@ export default function App() {
   const [selectedPos, setSelectedPos] = useState<CellPosition | null>({ row: 4, col: 4 });
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
   const [isNotesMode, setIsNotesMode] = useState<boolean>(false);
-  const [gameStatus, setGameStatus] = useState<GameStatus>("playing");
+  const [gameStatus, setGameStatus] = useState<GameStatus>("home");
+  const [savedGame, setSavedGame] = useState<ActiveGameState | null>(() => loadActiveGame());
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [mistakes, setMistakes] = useState<number>(0);
   const [hintsUsed, setHintsUsed] = useState<number>(0);
@@ -105,10 +107,18 @@ export default function App() {
     soundEffects.setEnabled(settings.soundEnabled);
   }, [settings.soundEnabled]);
 
-  // Try restoring saved game on mount
+  // Sync saved game on mount
   useEffect(() => {
     const saved = loadActiveGame();
-    if (saved && saved.gameStatus === "playing" && saved.board && saved.solution) {
+    if (saved && saved.board && saved.solution) {
+      setSavedGame(saved);
+    }
+  }, []);
+
+  // Resume active saved game
+  const handleResumeSavedGame = useCallback(() => {
+    const saved = savedGame || loadActiveGame();
+    if (saved && saved.board && saved.solution) {
       setBoard(saved.board);
       setSolution(saved.solution);
       setInitialGrid(saved.initialGrid);
@@ -120,8 +130,10 @@ export default function App() {
       setHistoryStack(saved.historyStack || []);
       setRedoStack(saved.redoStack || []);
       setGameStatus("playing");
+      setIsNotesMode(false);
+      setActiveHint(null);
     }
-  }, []);
+  }, [savedGame]);
 
   // Autosave game progress
   useEffect(() => {
@@ -141,6 +153,7 @@ export default function App() {
         lastUpdated: Date.now()
       };
       saveActiveGame(stateToSave);
+      setSavedGame(stateToSave);
     }
   }, [
     board,
@@ -643,85 +656,113 @@ export default function App() {
 
   return (
     <div
-      className={`h-[100dvh] max-h-[100dvh] w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between py-1 px-2 max-w-md mx-auto select-none overflow-hidden transition-colors duration-300 font-['Plus_Jakarta_Sans']`}
+      className={`h-[100dvh] max-h-[100dvh] w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between max-w-md mx-auto select-none overflow-hidden transition-colors duration-300 font-['Plus_Jakarta_Sans']`}
     >
-      {/* App Mobile Header */}
-      <Header
-        difficulty={difficulty}
-        themeId={settings.theme}
-        onOpenNewGame={() => setIsNewGameOpen(true)}
-        onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
-        onOpenAchievements={() => setIsAchievementsOpen(true)}
-        onOpenHistory={() => setIsHistoryOpen(true)}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
-        onOpenQuickTheme={() => setIsQuickThemeOpen(true)}
-      />
-
-      {/* Live Timer, Mistakes, Score bar */}
-      <StatsBar
-        difficulty={difficulty}
-        timerSeconds={timerSeconds}
-        mistakes={mistakes}
-        score={score}
-        gameStatus={gameStatus}
-        maxMistakesLimit={settings.maxMistakesLimit}
-        themeId={settings.theme}
-        onTogglePause={() =>
-          setGameStatus((prev) => (prev === "playing" ? "paused" : "playing"))
-        }
-      />
-
-      {/* Center Main Arena: 9x9 Interactive Grid */}
-      <main className="w-full flex-1 flex items-center justify-center my-auto py-1">
-        <div className="relative w-full flex items-center justify-center">
-          <SudokuGrid
-            board={board}
-            selectedPos={selectedPos}
-            highlightNumber={currentHighlightedNumber}
-            conflicts={conflicts}
-            errors={errors}
-            hintPos={activeHint?.position || null}
-            settings={settings}
+      {/* Home Screen / Main Menu */}
+      {gameStatus === "home" ? (
+        <HomeScreen
+          userProfile={userProfile}
+          themeId={settings.theme}
+          savedGame={savedGame}
+          gameHistory={gameHistory}
+          onStartNewGame={() => setIsNewGameOpen(true)}
+          onResumeGame={handleResumeSavedGame}
+          onOpenNewGameModal={() => setIsNewGameOpen(true)}
+          onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
+          onOpenAchievements={() => setIsAchievementsOpen(true)}
+          onOpenHistory={() => setIsHistoryOpen(true)}
+          onOpenSettings={() => setIsSettingsOpen(true)}
+          onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
+          onOpenQuickTheme={() => setIsQuickThemeOpen(true)}
+          onUpdateProfile={(newProfile) => {
+            setUserProfile(newProfile);
+            saveUserProfile(newProfile);
+          }}
+        />
+      ) : (
+        /* In-Game Arena Screen */
+        <div className="h-full w-full flex flex-col justify-between py-1 px-2">
+          {/* App Mobile Header */}
+          <Header
+            difficulty={difficulty}
             themeId={settings.theme}
-            isPaused={gameStatus === "paused"}
-            isCompleted={gameStatus === "completed"}
-            onCellClick={handleCellClick}
+            onGoHome={() => setGameStatus("home")}
+            onOpenNewGame={() => setIsNewGameOpen(true)}
+            onOpenLeaderboard={() => setIsLeaderboardOpen(true)}
+            onOpenAchievements={() => setIsAchievementsOpen(true)}
+            onOpenHistory={() => setIsHistoryOpen(true)}
+            onOpenSettings={() => setIsSettingsOpen(true)}
+            onOpenHowToPlay={() => setIsHowToPlayOpen(true)}
+            onOpenQuickTheme={() => setIsQuickThemeOpen(true)}
           />
 
-          {/* Pause Screen Overlay */}
-          {gameStatus === "paused" && (
-            <PauseOverlay
-              themeId={settings.theme}
-              onResume={() => setGameStatus("playing")}
-            />
-          )}
-        </div>
-      </main>
+          {/* Live Timer, Mistakes, Score bar */}
+          <StatsBar
+            difficulty={difficulty}
+            timerSeconds={timerSeconds}
+            mistakes={mistakes}
+            score={score}
+            gameStatus={gameStatus}
+            maxMistakesLimit={settings.maxMistakesLimit}
+            themeId={settings.theme}
+            onTogglePause={() =>
+              setGameStatus((prev) => (prev === "playing" ? "paused" : "playing"))
+            }
+          />
 
-      {/* Bottom Area: Controls & Touch Number Pad */}
-      <SudokuPad
-        numberCounts={numberCounts}
-        isNotesMode={isNotesMode}
-        selectedNumber={selectedNumber}
-        inputMode={settings.inputMode}
-        canUndo={historyStack.length > 0}
-        canRedo={redoStack.length > 0}
-        themeId={settings.theme}
-        onNumberClick={handleNumberPadClick}
-        onToggleNotes={() => setIsNotesMode((prev) => !prev)}
-        onErase={handleErase}
-        onUndo={handleUndo}
-        onRedo={handleRedo}
-        onHint={handleRequestHint}
-        onToggleInputMode={() =>
-          setSettings((prev) => {
-            const nextMode = prev.inputMode === "cell-first" ? "number-first" : "cell-first";
-            saveSettings({ ...prev, inputMode: nextMode });
-            return { ...prev, inputMode: nextMode };
-          })
-        }
-      />
+          {/* Center Main Arena: 9x9 Interactive Grid */}
+          <main className="w-full flex-1 flex items-center justify-center my-auto py-1">
+            <div className="relative w-full flex items-center justify-center">
+              <SudokuGrid
+                board={board}
+                selectedPos={selectedPos}
+                highlightNumber={currentHighlightedNumber}
+                conflicts={conflicts}
+                errors={errors}
+                hintPos={activeHint?.position || null}
+                settings={settings}
+                themeId={settings.theme}
+                isPaused={gameStatus === "paused"}
+                isCompleted={gameStatus === "completed"}
+                onCellClick={handleCellClick}
+              />
+
+              {/* Pause Screen Overlay */}
+              {gameStatus === "paused" && (
+                <PauseOverlay
+                  themeId={settings.theme}
+                  onResume={() => setGameStatus("playing")}
+                  onGoHome={() => setGameStatus("home")}
+                />
+              )}
+            </div>
+          </main>
+
+          {/* Bottom Area: Controls & Touch Number Pad */}
+          <SudokuPad
+            numberCounts={numberCounts}
+            isNotesMode={isNotesMode}
+            selectedNumber={selectedNumber}
+            inputMode={settings.inputMode}
+            canUndo={historyStack.length > 0}
+            canRedo={redoStack.length > 0}
+            themeId={settings.theme}
+            onNumberClick={handleNumberPadClick}
+            onToggleNotes={() => setIsNotesMode((prev) => !prev)}
+            onErase={handleErase}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            onHint={handleRequestHint}
+            onToggleInputMode={() =>
+              setSettings((prev) => {
+                const nextMode = prev.inputMode === "cell-first" ? "number-first" : "cell-first";
+                saveSettings({ ...prev, inputMode: nextMode });
+                return { ...prev, inputMode: nextMode };
+              })
+            }
+          />
+        </div>
+      )}
 
       {/* Modals */}
       {isNewGameOpen && (
@@ -819,13 +860,12 @@ export default function App() {
           unlockedAchievements={recentUnlockedAchievements}
           onPlayAgain={() => startNewGame(difficulty)}
           onOpenLeaderboard={() => {
-            setGameStatus("idle");
             setIsLeaderboardOpen(true);
           }}
           onOpenAchievements={() => {
-            setGameStatus("idle");
             setIsAchievementsOpen(true);
           }}
+          onGoHome={() => setGameStatus("home")}
         />
       )}
 
@@ -836,7 +876,6 @@ export default function App() {
           onClose={() => setActiveAchievementToast(null)}
         />
       )}
-
 
       {gameStatus === "game_over" && (
         <GameOverModal
@@ -849,6 +888,7 @@ export default function App() {
             setScore(0);
             setGameStatus("playing");
           }}
+          onGoHome={() => setGameStatus("home")}
         />
       )}
     </div>

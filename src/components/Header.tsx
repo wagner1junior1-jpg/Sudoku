@@ -6,7 +6,8 @@ import {
   Plus,
   HelpCircle,
   Palette,
-  Award
+  Award,
+  Home
 } from "lucide-react";
 import { DifficultyLevel, ThemeId } from "../types";
 import { DIFFICULTY_CONFIG } from "../utils/sudokuEngine";
@@ -15,6 +16,7 @@ import { THEMES } from "../utils/themes";
 interface HeaderProps {
   difficulty: DifficultyLevel;
   themeId: ThemeId;
+  onGoHome: () => void;
   onOpenNewGame: () => void;
   onOpenLeaderboard: () => void;
   onOpenAchievements: () => void;
@@ -27,6 +29,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   difficulty,
   themeId,
+  onGoHome,
   onOpenNewGame,
   onOpenLeaderboard,
   onOpenAchievements,
@@ -40,15 +43,21 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="w-full max-w-md mx-auto px-1 sm:px-2 pt-0.5 pb-1 flex items-center justify-between gap-1.5 select-none">
-      {/* Brand & Clickable Level Pill */}
+      {/* Home / Back & Level Pill */}
       <div className="flex items-center gap-1.5">
-        <h1 className={`text-lg sm:text-xl font-light tracking-tight ${currentTheme.textColor} flex items-center gap-1`}>
-          SUDOKU <span className="text-blue-500 font-bold text-xs">LOCAL</span>
-        </h1>
-        
+        <button
+          id="btn-header-home"
+          onClick={onGoHome}
+          className={`p-1.5 rounded-lg ${currentTheme.buttonBg} transition active:scale-95 flex items-center justify-center cursor-pointer`}
+          title="Voltar ao Menu Principal"
+          aria-label="Menu Inicial"
+        >
+          <Home className="w-4 h-4 text-blue-400" />
+        </button>
+
         <button
           onClick={onOpenNewGame}
-          className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 active:scale-95 transition cursor-pointer"
+          className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 active:scale-95 transition cursor-pointer"
           title="Mudar Dificuldade / Novo Jogo"
         >
           {diffInfo.label}

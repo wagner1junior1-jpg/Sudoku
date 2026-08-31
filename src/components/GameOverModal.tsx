@@ -1,5 +1,5 @@
 import React from "react";
-import { AlertOctagon, RotateCcw, ShieldAlert, HeartHandshake } from "lucide-react";
+import { AlertOctagon, RotateCcw, ShieldAlert, HeartHandshake, Home } from "lucide-react";
 import { DifficultyLevel, ThemeId } from "../types";
 import { THEMES } from "../utils/themes";
 
@@ -9,12 +9,14 @@ interface GameOverModalProps {
   themeId: ThemeId;
   onRestart: () => void;
   onContinueUnlimited: () => void;
+  onGoHome?: () => void;
 }
 
 export const GameOverModal: React.FC<GameOverModalProps> = ({
   themeId,
   onRestart,
-  onContinueUnlimited
+  onContinueUnlimited,
+  onGoHome
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
 
@@ -42,7 +44,7 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
           </p>
         </div>
 
-        <div className="w-full flex flex-col gap-2.5 mt-2">
+        <div className="w-full flex flex-col gap-2 mt-2">
           <button
             onClick={onRestart}
             className="w-full py-3.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-sm shadow-lg shadow-rose-600/30 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer uppercase tracking-wider"
@@ -58,6 +60,16 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             <HeartHandshake className="w-4 h-4 text-amber-500" />
             <span>Continuar Tabuleiro (Sem Pontos)</span>
           </button>
+
+          {onGoHome && (
+            <button
+              onClick={onGoHome}
+              className={`w-full py-2 rounded-xl bg-black/10 hover:bg-black/20 ${currentTheme.textColor} font-semibold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer`}
+            >
+              <Home className="w-3.5 h-3.5 text-blue-400" />
+              <span>Menu Principal</span>
+            </button>
+          )}
         </div>
       </div>
     </div>

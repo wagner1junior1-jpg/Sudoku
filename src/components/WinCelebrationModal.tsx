@@ -28,6 +28,7 @@ interface WinCelebrationModalProps {
   onPlayAgain: () => void;
   onOpenLeaderboard: () => void;
   onOpenAchievements?: () => void;
+  onGoHome?: () => void;
 }
 
 export const WinCelebrationModal: React.FC<WinCelebrationModalProps> = ({
@@ -40,7 +41,8 @@ export const WinCelebrationModal: React.FC<WinCelebrationModalProps> = ({
   unlockedAchievements = [],
   onPlayAgain,
   onOpenLeaderboard,
-  onOpenAchievements
+  onOpenAchievements,
+  onGoHome
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
   const diffInfo = DIFFICULTY_CONFIG[difficulty];
@@ -238,6 +240,15 @@ export const WinCelebrationModal: React.FC<WinCelebrationModalProps> = ({
               <span>Recordes</span>
             </button>
           </div>
+
+          {onGoHome && (
+            <button
+              onClick={onGoHome}
+              className={`w-full py-2 rounded-xl bg-black/10 hover:bg-black/20 ${currentTheme.textColor} font-semibold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 cursor-pointer`}
+            >
+              <span>Menu Principal</span>
+            </button>
+          )}
         </div>
       </div>
     </div>
