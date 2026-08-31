@@ -1,0 +1,18 @@
+{
+  "name": "Sudoku Master Pro",
+  "short_name": "Sudoku Pro",
+  "description": "Jogo de Sudoku 100% offline com múltiplos níveis de dificuldade e recordes locais.",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0b1329",
+  "theme_color": "#0b1329",
+  "icons": [
+    {
+      "src": "/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
