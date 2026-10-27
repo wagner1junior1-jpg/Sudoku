@@ -4,7 +4,8 @@ import {
   GameSettings,
   LeaderboardItem,
   UserProfile,
-  DifficultyLevel
+  DifficultyLevel,
+  DailyResult
 } from "../types";
 
 const STORAGE_KEYS = {
@@ -12,7 +13,8 @@ const STORAGE_KEYS = {
   GAME_HISTORY: "sudoku_game_history_v1",
   SETTINGS: "sudoku_settings_v1",
   USER_PROFILE: "sudoku_user_profile_v1",
-  OFFLINE_LEADERBOARD: "sudoku_offline_leaderboard_v1"
+  OFFLINE_LEADERBOARD: "sudoku_offline_leaderboard_v1",
+  DAILY_RESULTS: "sudoku_daily_results_v1"
 };
 
 export const DEFAULT_SETTINGS: GameSettings = {
@@ -150,6 +152,26 @@ export function loadLocalLeaderboard(): LeaderboardItem[] {
     return JSON.parse(raw);
   } catch {
     return [];
+  }
+}
+
+// Daily challenge results, keyed by challenge date
+export function saveDailyResult(result: DailyResult): void {
+  try {
+    const updated = { ...loadDailyResults(), [result.date]: result };
+    localStorage.setItem(STORAGE_KEYS.DAILY_RESULTS, JSON.stringify(updated));
+  } catch {
+    // Ignore
+  }
+}
+
+export function loadDailyResults(): Record<string, DailyResult> {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEYS.DAILY_RESULTS);
+    if (!raw) return {};
+    return JSON.parse(raw);
+  } catch {
+    return {};
   }
 }
 

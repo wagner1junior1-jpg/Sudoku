@@ -94,6 +94,18 @@ export interface ActiveGameState {
   historyStack: GameMoveHistory[];
   redoStack: GameMoveHistory[];
   lastUpdated: number;
+  dailyDate?: string; // "YYYY-MM-DD" when this is a daily challenge
+}
+
+export interface DailyResult {
+  date: string; // "YYYY-MM-DD" of the challenge
+  difficulty: DifficultyLevel;
+  timeSeconds: number;
+  mistakes: number;
+  hintsUsed: number;
+  score: number;
+  onTime: boolean; // finished on the challenge's own day (counts for the streak)
+  completedAt: string;
 }
 
 export interface HintExplanation {

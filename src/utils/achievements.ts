@@ -4,6 +4,8 @@ import {
   GameHistoryItem,
   GameMoveHistory
 } from "../types";
+import { loadDailyResults } from "./storage";
+import { getDailyStreak } from "./daily";
 
 export const ACHIEVEMENTS_LIST: Achievement[] = [
   {
@@ -113,8 +115,37 @@ export const ACHIEVEMENTS_LIST: Achievement[] = [
     iconName: "Star",
     points: 350,
     reqText: "7.500+ pontos em 1 jogo"
+  },
+  {
+    id: "daily_first",
+    title: "Hábito Iniciado",
+    description: "Conclua um Desafio Diário no próprio dia.",
+    category: "desafio",
+    iconName: "Flame",
+    points: 150,
+    reqText: "1 desafio diário no dia"
+  },
+  {
+    id: "daily_streak_7",
+    title: "Semana de Fogo",
+    description: "Conclua o Desafio Diário 7 dias seguidos.",
+    category: "desafio",
+    iconName: "Flame",
+    points: 400,
+    reqText: "7 dias seguidos"
+  },
+  {
+    id: "daily_streak_30",
+    title: "Mês Imbatível",
+    description: "Conclua o Desafio Diário 30 dias seguidos.",
+    category: "desafio",
+    iconName: "Crown",
+    points: 1500,
+    reqText: "30 dias seguidos"
   }
 ];
+
+const DAILY_STREAK_GOALS: Record<string, number> = { daily_streak_7: 7, daily_streak_30: 30 };
 
 const STORAGE_ACHIEVEMENTS_KEY = "sudoku_achievements_v1";
 
@@ -144,6 +175,8 @@ export interface MatchCheckContext {
   hintsUsed: number;
   historyStack: GameMoveHistory[];
   allHistory: GameHistoryItem[];
+  // Set when the match was a daily challenge; streak already includes this win
+  daily?: { onTime: boolean; streak: number };
 }
 
 export function evaluateAchievements(ctx: MatchCheckContext): Achievement[] {
@@ -234,6 +267,14 @@ export function evaluateAchievements(ctx: MatchCheckContext): Achievement[] {
     unlock("score_elite");
   }
 
+  // 13. Daily challenge: only wins on the challenge's own day count
+  if (ctx.daily?.onTime) {
+    unlock("daily_first");
+    for (const [id, goal] of Object.entries(DAILY_STREAK_GOALS)) {
+      if (ctx.daily.streak >= goal) unlock(id);
+    }
+  }
+
   if (newlyUnlocked.length > 0) {
     saveUnlockedAchievementsMap(updatedMap);
   }
@@ -250,6 +291,9 @@ export function getAllAchievementsWithStatus(allHistory: GameHistoryItem[]): {
   const map = loadUnlockedAchievementsMap();
   const wonHistory = allHistory.filter((h) => h.won);
   const totalWins = wonHistory.length;
+  const dailyResults = loadDailyResults();
+  const dailyBest = getDailyStreak(dailyResults).best;
+  const hasOnTimeDaily = Object.values(dailyResults).some((r) => r.onTime);
 
   let earnedPoints = 0;
   let totalPoints = 0;
@@ -269,6 +313,10 @@ export function getAllAchievementsWithStatus(allHistory: GameHistoryItem[]): {
     if (!isUnlocked) {
       if (ach.id === "first_win") progress = totalWins > 0 ? 100 : 0;
       else if (ach.id === "veteran_5") progress = Math.min(100, Math.round((totalWins / 5) * 100));
+      else if (ach.id === "daily_first") progress = hasOnTimeDaily ? 100 : 0;
+      else if (DAILY_STREAK_GOALS[ach.id]) {
+        progress = Math.min(100, Math.round((dailyBest / DAILY_STREAK_GOALS[ach.id]) * 100));
+      }
     }
 
     return {

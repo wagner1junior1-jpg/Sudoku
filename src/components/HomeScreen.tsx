@@ -12,18 +12,23 @@ import {
   Sparkles,
   Clock,
   Download,
-  Plus
+  Plus,
+  Flame,
+  CalendarDays,
+  CheckCircle2
 } from "lucide-react";
 import {
   DifficultyLevel,
   ThemeId,
   UserProfile,
   GameHistoryItem,
-  ActiveGameState
+  ActiveGameState,
+  DailyResult
 } from "../types";
 import { THEMES } from "../utils/themes";
 import { DIFFICULTY_CONFIG, formatTime } from "../utils/sudokuEngine";
 import { getAllAchievementsWithStatus } from "../utils/achievements";
+import { formatDailyDate, getDailyDifficulty, getDailyStreak, todayKey } from "../utils/daily";
 
 interface HomeScreenProps {
   userProfile: UserProfile;
@@ -31,6 +36,9 @@ interface HomeScreenProps {
   savedGame: ActiveGameState | null;
   gameHistory: GameHistoryItem[];
   isPWAInstalled?: boolean;
+  dailyResults: Record<string, DailyResult>;
+  onPlayDaily: (dateKey: string) => void;
+  onOpenDailyCalendar: () => void;
   onStartNewGame: () => void;
   onResumeGame: () => void;
   onOpenNewGameModal: () => void;
@@ -51,6 +59,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   savedGame,
   gameHistory,
   isPWAInstalled,
+  dailyResults,
+  onPlayDaily,
+  onOpenDailyCalendar,
   onResumeGame,
   onOpenNewGameModal,
   onOpenLeaderboard,
@@ -78,6 +89,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
     setPlayerName(trimmed);
     onUpdateProfile({ ...userProfile, name: trimmed });
   };
+
+  const today = todayKey();
+  const todayResult = dailyResults[today];
+  const todayDifficulty = DIFFICULTY_CONFIG[getDailyDifficulty(today)].label;
+  const dailyStreak = getDailyStreak(dailyResults, today).current;
 
   const hasValidSavedGame =
     Boolean(savedGame) &&
@@ -276,6 +292,53 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </button>
         )}
 
+        {/* Daily Challenge Card */}
+        <div
+          className={`w-full p-2.5 rounded-2xl ${currentTheme.cardBg} border border-orange-500/40 shadow-md flex items-center gap-2 text-left`}
+        >
+          <button
+            id="btn-daily-challenge-home"
+            onClick={() => (todayResult ? onOpenDailyCalendar() : onPlayDaily(today))}
+            className="flex-1 min-w-0 flex items-center gap-2.5 transition active:scale-[0.99] cursor-pointer text-left"
+          >
+            <div className="w-9 h-9 shrink-0 rounded-xl bg-orange-500/15 border border-orange-500/30 flex items-center justify-center text-orange-400">
+              {todayResult ? <CheckCircle2 className="w-4 h-4" /> : <Flame className="w-4 h-4" />}
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xs font-bold leading-tight flex items-center gap-1.5">
+                <span>Desafio Diário</span>
+                <span className={`text-[10px] font-semibold first-letter:uppercase ${currentTheme.textMuted}`}>
+                  {formatDailyDate(today, { weekday: "short", day: "numeric", month: "short" })}
+                </span>
+              </h3>
+              <p className={`text-[10px] ${currentTheme.textMuted} truncate`}>
+                {todayResult
+                  ? `Concluído em ${formatTime(todayResult.timeSeconds)} · volte amanhã!`
+                  : savedGame?.dailyDate === today
+                    ? `${todayDifficulty} · em andamento`
+                    : `${todayDifficulty} · igual para todos`}
+              </p>
+            </div>
+          </button>
+
+          <span
+            className="shrink-0 flex items-center gap-0.5 text-[11px] font-black px-2 py-0.5 rounded-full bg-orange-500/15 border border-orange-500/30 text-orange-400"
+            title="Dias seguidos concluindo o desafio"
+          >
+            <Flame className="w-3 h-3" />
+            {dailyStreak}
+          </span>
+
+          <button
+            onClick={onOpenDailyCalendar}
+            className={`shrink-0 p-2 rounded-xl ${currentTheme.buttonBg} transition active:scale-95 cursor-pointer`}
+            title="Calendário de desafios"
+            aria-label="Calendário de desafios"
+          >
+            <CalendarDays className="w-4 h-4 text-orange-400" />
+          </button>
+        </div>
+
         {/* Clickable Achievements Card */}
         <button
           onClick={onOpenAchievements}
@@ -329,7 +392,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               <div className="flex items-center gap-1.5 text-xs font-mono font-bold bg-black/20 px-2 py-0.5 rounded-lg">
                 <Clock className="w-3 h-3 text-emerald-300" />
                 <span>{formatTime(savedGame.timerSeconds)}</span>
-                <span className="capitalize text-emerald-200">({savedGame.difficulty})</span>
+                <span className="capitalize text-emerald-200">
+                  ({savedGame.dailyDate ? "diário" : savedGame.difficulty})
+                </span>
               </div>
             </button>
           )}

@@ -25,6 +25,7 @@ interface WinCelebrationModalProps {
   userProfile: UserProfile;
   themeId: ThemeId;
   unlockedAchievements?: Achievement[];
+  dailyMessage?: string;
   onPlayAgain: () => void;
   onOpenLeaderboard: () => void;
   onOpenAchievements?: () => void;
@@ -39,6 +40,7 @@ export const WinCelebrationModal: React.FC<WinCelebrationModalProps> = ({
   hintsUsed,
   themeId,
   unlockedAchievements = [],
+  dailyMessage,
   onPlayAgain,
   onOpenLeaderboard,
   onOpenAchievements,
@@ -144,6 +146,14 @@ export const WinCelebrationModal: React.FC<WinCelebrationModalProps> = ({
             Tabuleiro concluído com sucesso e salvo nos recordes.
           </p>
         </div>
+
+        {/* Daily challenge result and streak */}
+        {dailyMessage && (
+          <div className="w-full p-2.5 rounded-xl bg-orange-500/15 border border-orange-500/40 flex items-center justify-center gap-1.5 text-orange-600 dark:text-orange-300 text-xs font-black">
+            <Flame className="w-4 h-4" />
+            <span>{dailyMessage}</span>
+          </div>
+        )}
 
         {/* Newly Unlocked Achievements in this Match */}
         {unlockedAchievements.length > 0 && (

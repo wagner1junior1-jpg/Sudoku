@@ -12,7 +12,8 @@ import {
   GameSettings,
   UserProfile,
   HintExplanation,
-  ActiveGameState
+  ActiveGameState,
+  DailyResult
 } from "./types";
 import {
   generateSudokuPuzzle,
@@ -36,8 +37,17 @@ import {
   saveUserProfile,
   loadUserProfile,
   saveLocalLeaderboardRecord,
-  loadLocalLeaderboard
+  loadLocalLeaderboard,
+  saveDailyResult,
+  loadDailyResults
 } from "./utils/storage";
+import {
+  generateDailyPuzzle,
+  getDailyDifficulty,
+  getDailyStreak,
+  todayKey,
+  formatDailyDate
+} from "./utils/daily";
 import { THEMES } from "./utils/themes";
 
 // Components
@@ -61,6 +71,7 @@ import { AchievementToast } from "./components/AchievementToast";
 import { PWAInstallModal } from "./components/PWAInstallModal";
 import { PWAUpdateToast } from "./components/PWAUpdateToast";
 import { FeedbackModal } from "./components/FeedbackModal";
+import { DailyChallengeModal } from "./components/DailyChallengeModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
 import { isNativeApp } from "./utils/platform";
@@ -97,6 +108,13 @@ export default function App() {
   const [localLeaderboard, setLocalLeaderboard] = useState<LeaderboardItem[]>(() =>
     loadLocalLeaderboard()
   );
+
+  // Daily challenge: date of the current daily game (null for a regular game) and past results
+  const [dailyDate, setDailyDate] = useState<string | null>(null);
+  const [dailyResults, setDailyResults] = useState<Record<string, DailyResult>>(() =>
+    loadDailyResults()
+  );
+  const [isDailyOpen, setIsDailyOpen] = useState(false);
 
   // Modals & UI overlays
   const [isNewGameOpen, setIsNewGameOpen] = useState(false);
@@ -179,6 +197,7 @@ export default function App() {
       setScore(saved.score);
       setHistoryStack(saved.historyStack || []);
       setRedoStack(saved.redoStack || []);
+      setDailyDate(saved.dailyDate ?? null);
       setGameStatus("playing");
       setIsNotesMode(false);
       setActiveHint(null);
@@ -200,7 +219,8 @@ export default function App() {
         gameStatus,
         historyStack,
         redoStack,
-        lastUpdated: Date.now()
+        lastUpdated: Date.now(),
+        dailyDate: dailyDate ?? undefined
       };
       saveActiveGame(stateToSave);
       setSavedGame(stateToSave);
@@ -216,7 +236,8 @@ export default function App() {
     score,
     gameStatus,
     historyStack,
-    redoStack
+    redoStack,
+    dailyDate
   ]);
 
   // Stopwatch Timer Interval
@@ -237,6 +258,15 @@ export default function App() {
     };
   }, [gameStatus, difficulty, timerSeconds, mistakes, hintsUsed, hasContinuedPastLimit]);
 
+  // Victory banner for a finished daily challenge
+  const finishedDaily = dailyDate ? dailyResults[dailyDate] : undefined;
+  const dailyStreakNow = getDailyStreak(dailyResults).current;
+  const dailyWinMessage = !finishedDaily
+    ? undefined
+    : finishedDaily.onTime
+      ? `Desafio diário concluído! 🔥 ${dailyStreakNow} ${dailyStreakNow === 1 ? "dia seguido" : "dias seguidos"}`
+      : `Desafio de ${formatDailyDate(finishedDaily.date, { day: "numeric", month: "long" })} concluído`;
+
   // Check conflicts and errors in real-time
   const { conflicts, errors } = detectConflicts(board);
   const numberCounts = getNumberCounts(board);
@@ -247,9 +277,10 @@ export default function App() {
       ? board[selectedPos.row][selectedPos.col].value
       : selectedNumber;
 
-  // Start a new game
-  const startNewGame = useCallback((newDifficulty: DifficultyLevel) => {
-    const puzzle = generateSudokuPuzzle(newDifficulty);
+  // Start a new game (a daily challenge when `daily` holds its date)
+  const startNewGame = useCallback((newDifficulty: DifficultyLevel, daily: string | null = null) => {
+    const puzzle = daily ? generateDailyPuzzle(daily) : generateSudokuPuzzle(newDifficulty);
+    setDailyDate(daily);
     setDifficulty(newDifficulty);
     setBoard(puzzle.board);
     setSolution(puzzle.solution);
@@ -268,6 +299,16 @@ export default function App() {
     setActiveHint(null);
     setIsNewGameOpen(false);
   }, []);
+
+  // Play a daily challenge, resuming it if it was left mid-game
+  const handlePlayDaily = (dateKey: string) => {
+    setIsDailyOpen(false);
+    if (savedGame?.dailyDate === dateKey && savedGame.board) {
+      handleResumeSavedGame();
+    } else {
+      startNewGame(getDailyDifficulty(dateKey), dateKey);
+    }
+  };
 
   // Place number or note at specific cell
   const handleInputDigit = useCallback(
@@ -456,9 +497,30 @@ export default function App() {
       completedAt: new Date().toISOString()
     };
 
+    let dailyAchievementInfo: { onTime: boolean; streak: number } | undefined;
+
     saveGameHistory(historyItem);
     const updatedHistory = [historyItem, ...gameHistory];
     setGameHistory(updatedHistory);
+
+    if (dailyDate) {
+      const dailyResult: DailyResult = {
+        date: dailyDate,
+        difficulty,
+        timeSeconds: timerSeconds,
+        mistakes,
+        hintsUsed,
+        score: finalScore,
+        onTime: dailyDate === todayKey(),
+        completedAt: historyItem.completedAt
+      };
+      saveDailyResult(dailyResult);
+      setDailyResults((prev) => ({ ...prev, [dailyDate]: dailyResult }));
+      dailyAchievementInfo = {
+        onTime: dailyResult.onTime,
+        streak: getDailyStreak({ ...dailyResults, [dailyDate]: dailyResult }).current
+      };
+    }
 
     // Evaluate and trigger achievements
     const newlyUnlocked = evaluateAchievements({
@@ -468,7 +530,8 @@ export default function App() {
       mistakes,
       hintsUsed,
       historyStack,
-      allHistory: updatedHistory
+      allHistory: updatedHistory,
+      daily: dailyAchievementInfo
     });
 
     if (newlyUnlocked.length > 0) {
@@ -835,6 +898,9 @@ export default function App() {
           savedGame={savedGame}
           gameHistory={gameHistory}
           isPWAInstalled={isPWAInstalled}
+          dailyResults={dailyResults}
+          onPlayDaily={handlePlayDaily}
+          onOpenDailyCalendar={() => setIsDailyOpen(true)}
           onStartNewGame={() => setIsNewGameOpen(true)}
           onResumeGame={handleResumeSavedGame}
           onOpenNewGameModal={() => setIsNewGameOpen(true)}
@@ -1034,6 +1100,7 @@ export default function App() {
           userProfile={userProfile}
           themeId={settings.theme}
           unlockedAchievements={recentUnlockedAchievements}
+          dailyMessage={dailyWinMessage}
           onPlayAgain={() => startNewGame(difficulty)}
           onOpenLeaderboard={() => {
             setIsLeaderboardOpen(true);
@@ -1042,6 +1109,16 @@ export default function App() {
             setIsAchievementsOpen(true);
           }}
           onGoHome={() => setGameStatus("home")}
+        />
+      )}
+
+      {isDailyOpen && (
+        <DailyChallengeModal
+          themeId={settings.theme}
+          results={dailyResults}
+          inProgressDate={savedGame?.dailyDate}
+          onPlay={handlePlayDaily}
+          onClose={() => setIsDailyOpen(false)}
         />
       )}
 
@@ -1082,7 +1159,7 @@ export default function App() {
           difficulty={difficulty}
           mistakes={mistakes}
           themeId={settings.theme}
-          onRestart={() => startNewGame(difficulty)}
+          onRestart={() => startNewGame(difficulty, dailyDate)}
           onContinueUnlimited={() => {
             setHasContinuedPastLimit(true);
             setScore(0);
