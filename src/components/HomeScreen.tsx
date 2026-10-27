@@ -87,7 +87,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   return (
     <div
       id="home-screen"
-      className={`h-[100dvh] max-h-[100dvh] w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between py-3 px-3.5 max-w-md mx-auto select-none overflow-y-auto no-scrollbar font-['Plus_Jakarta_Sans'] transition-colors duration-300 animate-fade-in`}
+      className={`h-full max-h-full w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between py-3 px-3.5 max-w-md mx-auto select-none overflow-y-auto no-scrollbar font-['Plus_Jakarta_Sans'] transition-colors duration-300 animate-fade-in`}
     >
       {/* Top Header Bar */}
       <header className="flex items-center justify-between gap-2 pt-1 pb-2">
@@ -153,13 +153,13 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </header>
 
       {/* Main Hero & Branding Area */}
-      <main className="flex-1 flex flex-col items-center justify-center gap-3 my-auto py-1 text-center">
+      <main className="flex-1 flex flex-col items-center justify-center gap-3 [@media(max-height:760px)]:gap-1.5 my-auto py-1 text-center">
         {/* Animated Visual Board Artwork */}
         <div className="relative group cursor-pointer" onClick={onOpenNewGameModal}>
           <div className="absolute -inset-1.5 bg-gradient-to-r from-blue-600 via-indigo-500 to-amber-400 rounded-3xl blur-md opacity-35 group-hover:opacity-60 transition duration-300 animate-pulse" />
           
           <div
-            className={`relative w-24 h-24 sm:w-28 sm:h-28 rounded-3xl ${currentTheme.cardBg} border-2 border-blue-500/40 p-2 shadow-2xl flex flex-col justify-between overflow-hidden`}
+            className={`relative w-24 h-24 sm:w-28 sm:h-28 [@media(max-height:760px)]:w-16 [@media(max-height:760px)]:h-16 rounded-3xl ${currentTheme.cardBg} border-2 border-blue-500/40 p-2 shadow-2xl flex flex-col justify-between overflow-hidden`}
           >
             {/* 3x3 Mini Grid Art */}
             <div className="grid grid-cols-3 grid-rows-3 gap-1 h-full w-full">
@@ -181,7 +181,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           <h1 className="text-2xl sm:text-3xl font-black tracking-tight leading-tight font-['Outfit']">
             SUDOKU <span className="text-blue-500">MASTER</span> PRO
           </h1>
-          <p className={`text-xs ${currentTheme.textMuted} mt-0.5 font-medium`}>
+          <p className={`text-xs ${currentTheme.textMuted} mt-0.5 font-medium [@media(max-height:760px)]:hidden`}>
             Desafie sua mente no clássico jogo de números
           </p>
         </div>

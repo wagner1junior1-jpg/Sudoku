@@ -63,6 +63,7 @@ import { FeedbackModal } from "./components/FeedbackModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
 import { isNativeApp } from "./utils/platform";
+import { startAdBanner } from "./utils/ads";
 
 export default function App() {
   // Settings & Profile
@@ -112,6 +113,7 @@ export default function App() {
   const [recentUnlockedAchievements, setRecentUnlockedAchievements] = useState<Achievement[]>([]);
   const [activeAchievementToast, setActiveAchievementToast] = useState<Achievement | null>(null);
   const [hasContinuedPastLimit, setHasContinuedPastLimit] = useState(false);
+  const [adBannerHeight, setAdBannerHeight] = useState(0);
 
   // Detect PWA installation and listen for install prompts
   useEffect(() => {
@@ -142,6 +144,11 @@ export default function App() {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
       window.removeEventListener("appinstalled", handleAppInstalled);
     };
+  }, []);
+
+  // Faixa de anúncio na base da tela (somente app Android)
+  useEffect(() => {
+    startAdBanner(setAdBannerHeight);
   }, []);
 
   // Sound effects sync
@@ -751,6 +758,15 @@ export default function App() {
 
   return (
     <div
+      // A faixa de anúncio é nativa e fixa na base: reservamos o espaço dela e informamos a altura ao tabuleiro
+      style={
+        {
+          "--ad-h": `${adBannerHeight}px`,
+          ...(adBannerHeight > 0
+            ? { paddingBottom: `calc(env(safe-area-inset-bottom) + ${adBannerHeight}px)` }
+            : {})
+        } as React.CSSProperties
+      }
       className={`h-[100dvh] max-h-[100dvh] w-full pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between max-w-md mx-auto select-none overflow-hidden transition-colors duration-300 font-['Plus_Jakarta_Sans']`}
     >
       {/* Home Screen / Main Menu */}

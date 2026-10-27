@@ -52,19 +52,36 @@ Textos prontos em [store/listing-pt-BR.md](store/listing-pt-BR.md). Gráficos em
 
 - **Classificação de conteúdo (IARC)**: jogo de quebra-cabeça, sem violência, sem conteúdo adulto, sem
   interação entre usuários, sem compras → deve resultar em *Livre*.
-- **Público-alvo**: 13+ (ou "todas as idades" se não quiser entrar na política de apps para crianças; se marcar
-  menores de 13, a política *Families* exige revisão extra).
-- **Anúncios**: não contém anúncios.
+- **Público-alvo**: **13+** (não marque menores de 13: a política *Families* só permite SDKs de anúncio certificados
+  e exigiria outra configuração do AdMob).
+- **Anúncios**: **SIM, contém anúncios** (Google AdMob, faixa inferior).
 - **Compras no app**: não.
-- **Segurança dos dados (Data safety)**:
-  - Coleta de dados: **Não** (o app não envia nada para fora do aparelho).
-  - Compartilhamento de dados: **Não**.
-  - Criptografia em trânsito / exclusão de dados: não se aplica (sem dados enviados).
-  - Se você reativar o Google Analytics dentro do app, será preciso declarar "ID do dispositivo / interações
-    do app" coletados e atualizar a política de privacidade.
-- **Permissões**: `INTERNET` e `VIBRATE` (sem permissões sensíveis).
+- **ID de publicidade**: declare que o app **usa** (finalidade: publicidade). A permissão `AD_ID` entra sozinha pelo SDK.
+- **Segurança dos dados (Data safety)** — o AdMob coleta/compartilha dados com o Google:
+  - Coleta: **Sim** → *Identificadores de dispositivo ou outros* (ID de publicidade), *Localização aproximada* (IP),
+    *Informações do app e desempenho* (diagnósticos) e *Atividade no app* (interações com anúncios).
+    Finalidades: **Publicidade ou marketing** e **Análise**. Compartilhado com terceiros: **Sim** (Google).
+  - Os dados do jogo (progresso, nome do jogador) ficam só no aparelho: não são coletados.
+  - Confira a lista oficial: <https://support.google.com/admob/answer/10130996>
+  - Criptografia em trânsito: sim (SDK do Google). Exclusão de dados: o usuário redefine o ID de publicidade no Android.
+- **Permissões** (todas normais, sem sensíveis): `INTERNET`, `ACCESS_NETWORK_STATE`, `VIBRATE`, `AD_ID` e as do SDK de anúncios (`ACCESS_ADSERVICES_*`, `WAKE_LOCK`, `FOREGROUND_SERVICE`).
 - **Categoria**: Jogos › Quebra-cabeça. **Contato**: e-mail de suporte público: `wagner1junior1@gmail.com` (obrigatório na Play).
 - **Acesso ao app**: sem login, tudo acessível.
+
+## 5.1 Configurar o AdMob (obrigatório antes de publicar)
+
+O app está com os **IDs de TESTE do Google**: mostra anúncios de teste e não gera receita.
+
+1. Crie a conta em <https://admob.google.com> e adicione o app Android (`com.sudokumasterpro.app`).
+   (Só dá para vincular à loja depois que o app existir na Play; pode adicionar "sem publicar" e vincular depois.)
+2. Copie o **ID do app** (`ca-app-pub-XXXX~YYYY`) para `android/app/src/main/res/values/strings.xml` (`admob_app_id`).
+3. Crie um bloco de anúncios **Banner** e copie o **ID do bloco** (`ca-app-pub-XXXX/ZZZZ`) para um arquivo `.env.production`
+   na raiz: `VITE_ADMOB_BANNER_ID=ca-app-pub-XXXX/ZZZZ` (está no `.gitignore`). No GitHub Actions, defina o mesmo valor
+   como *variable* e exporte no passo de build.
+4. No AdMob › **Privacidade e mensagens**, crie e **publique** a mensagem de consentimento (GDPR/UMP). Sem ela, usuários
+   do EEE/Reino Unido não verão anúncios.
+5. Rode `npm run cap:sync` e gere o AAB de novo (aumente o `versionCode`).
+6. Nunca clique nos seus próprios anúncios de produção (risco de suspensão da conta).
 
 ## 6. Fluxo recomendado
 

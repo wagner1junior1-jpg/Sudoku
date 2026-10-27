@@ -108,7 +108,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
   return (
     <div
       id="sudoku-grid-container"
-      className="w-full max-w-[min(100vw-8px,460px,55vh)] mx-auto select-none flex items-center justify-center"
+      className="w-full max-w-[min(100vw-8px,460px,calc(55vh-var(--ad-h,0px)))] mx-auto select-none flex items-center justify-center"
     >
       <div
         className={`relative aspect-square w-full rounded-2xl ${currentTheme.cardBg} p-1 sm:p-1.5 border shadow-2xl overflow-hidden`}
