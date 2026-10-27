@@ -6,6 +6,7 @@ import {
   Pencil,
   Sparkles,
   WandSparkles,
+  Clapperboard,
   MousePointerClick,
   Hash
 } from "lucide-react";
@@ -26,6 +27,7 @@ interface SudokuPadProps {
   onUndo: () => void;
   onRedo: () => void;
   onHint: () => void;
+  hintsLeft?: number; // undefined = unlimited hints
   onFillNotes: () => void;
   onToggleInputMode: () => void;
 }
@@ -44,6 +46,7 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
   onUndo,
   onRedo,
   onHint,
+  hintsLeft,
   onFillNotes,
   onToggleInputMode
 }) => {
@@ -173,11 +176,21 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
           <button
             id="btn-action-hint"
             onClick={onHint}
-            className="py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal bg-gradient-to-tr from-amber-500 to-amber-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md shadow-amber-500/25 transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 border border-amber-300/40"
-            title="Pedir Dica"
+            className="relative py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal bg-gradient-to-tr from-amber-500 to-amber-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md shadow-amber-500/25 transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 border border-amber-300/40"
+            title={hintsLeft === 0 ? "Sem dicas: assista a um anúncio para ganhar mais" : "Pedir Dica"}
           >
             <Sparkles className="w-4 h-4 text-slate-950 fill-slate-950/20" />
             <span className="text-[9px] min-[380px]:text-[10px] font-bold">Dica</span>
+            {hintsLeft !== undefined && (
+              <span
+                id="hints-left-badge"
+                className={`absolute -top-1.5 -right-1 min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-black leading-none flex items-center justify-center border border-white shadow ${
+                  hintsLeft > 0 ? "bg-indigo-600 text-white" : "bg-emerald-500 text-white"
+                }`}
+              >
+                {hintsLeft > 0 ? hintsLeft : <Clapperboard className="w-3 h-3" />}
+              </span>
+            )}
           </button>
         </div>
       </div>

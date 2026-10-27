@@ -75,6 +75,8 @@ import { DailyChallengeModal } from "./components/DailyChallengeModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
 import { isNativeApp } from "./utils/platform";
+import { FREE_HINTS_PER_GAME, HINTS_PER_AD } from "./utils/hints";
+import { HintsAdModal } from "./components/HintsAdModal";
 import { startAdBanner, stopAdBanner, showRewardedAd, isRewardedAdConfigured, RewardedAdResult } from "./utils/ads";
 import { isAdsRemoved, syncAdsRemoved } from "./utils/billing";
 import { RemoveAdsModal } from "./components/RemoveAdsModal";
@@ -99,6 +101,8 @@ export default function App() {
   const [timerSeconds, setTimerSeconds] = useState<number>(0);
   const [mistakes, setMistakes] = useState<number>(0);
   const [hintsUsed, setHintsUsed] = useState<number>(0);
+  const [hintsLeft, setHintsLeft] = useState<number>(FREE_HINTS_PER_GAME);
+  const [isHintsOutOpen, setIsHintsOutOpen] = useState(false);
   const [score, setScore] = useState<number>(5000);
 
   // Undo / Redo Stacks
@@ -209,6 +213,7 @@ export default function App() {
       setTimerSeconds(saved.timerSeconds);
       setMistakes(saved.mistakes);
       setHintsUsed(saved.hintsUsed);
+      setHintsLeft(saved.hintsLeft ?? Math.max(0, FREE_HINTS_PER_GAME - saved.hintsUsed));
       setScore(saved.score);
       setHistoryStack(saved.historyStack || []);
       setRedoStack(saved.redoStack || []);
@@ -231,6 +236,7 @@ export default function App() {
         timerSeconds,
         mistakes,
         hintsUsed,
+        hintsLeft,
         score,
         gameStatus,
         historyStack,
@@ -249,6 +255,7 @@ export default function App() {
     timerSeconds,
     mistakes,
     hintsUsed,
+    hintsLeft,
     score,
     gameStatus,
     historyStack,
@@ -304,6 +311,7 @@ export default function App() {
     setTimerSeconds(0);
     setMistakes(0);
     setHintsUsed(0);
+    setHintsLeft(FREE_HINTS_PER_GAME);
     setScore(5000);
     setSelectedPos({ row: 4, col: 4 });
     setSelectedNumber(null);
@@ -732,17 +740,39 @@ export default function App() {
     soundEffects.playNoteTick();
   }, [redoStack, board, gameStatus]);
 
+  // Hints are a limited resource only where a rewarded ad can refill them (otherwise players would get stuck)
+  const hintsLimited = isRewardedAdConfigured;
+
+  // Shows the next smart hint; false when the board has nothing left to hint
+  const revealHint = useCallback((): boolean => {
+    const hint = generateSmartHint(board);
+    if (!hint) return false;
+    setActiveHint(hint);
+    setSelectedPos(hint.position);
+    setHintsUsed((prev) => prev + 1);
+    soundEffects.playHint();
+    return true;
+  }, [board]);
+
   // Trigger Smart Hint
   const handleRequestHint = useCallback(() => {
     if (gameStatus !== "playing") return;
-    const hint = generateSmartHint(board);
-    if (hint) {
-      setActiveHint(hint);
-      setSelectedPos(hint.position);
-      setHintsUsed((prev) => prev + 1);
-      soundEffects.playHint();
+    if (hintsLimited && hintsLeft <= 0) {
+      setIsHintsOutOpen(true);
+      return;
     }
-  }, [board, gameStatus]);
+    if (revealHint() && hintsLimited) setHintsLeft((prev) => Math.max(0, prev - 1));
+  }, [gameStatus, hintsLimited, hintsLeft, revealHint]);
+
+  // Out of hints: a rewarded ad gives HINTS_PER_AD more, and one is shown right away
+  const handleWatchAdForHints = async (): Promise<RewardedAdResult> => {
+    const result = await showRewardedAd();
+    if (result === "rewarded") {
+      setIsHintsOutOpen(false);
+      setHintsLeft(HINTS_PER_AD - (revealHint() ? 1 : 0));
+    }
+    return result;
+  };
 
   // Apply Hint from Modal
   const handleApplyHint = () => {
@@ -875,6 +905,7 @@ export default function App() {
   backHandlerRef.current = () => {
     if (isFeedbackOpen) return setIsFeedbackOpen(false);
     if (isRemoveAdsOpen) return setIsRemoveAdsOpen(false);
+    if (isHintsOutOpen) return setIsHintsOutOpen(false);
     if (activeHint) return setActiveHint(null);
     if (isHowToPlayOpen) return setIsHowToPlayOpen(false);
     if (isSettingsOpen) return setIsSettingsOpen(false);
@@ -1025,6 +1056,7 @@ export default function App() {
             onRedo={handleRedo}
             onHint={handleRequestHint}
             onFillNotes={handleFillNotes}
+            hintsLeft={hintsLimited ? hintsLeft : undefined}
             onToggleInputMode={() =>
               setSettings((prev) => {
                 const nextMode = prev.inputMode === "cell-first" ? "number-first" : "cell-first";
@@ -1158,6 +1190,15 @@ export default function App() {
           adsRemoved={adsRemoved}
           onAdsRemoved={() => setAdsRemoved(true)}
           onClose={() => setIsRemoveAdsOpen(false)}
+        />
+      )}
+
+      {isHintsOutOpen && (
+        <HintsAdModal
+          themeId={settings.theme}
+          hintsPerAd={HINTS_PER_AD}
+          onWatchAd={handleWatchAdForHints}
+          onClose={() => setIsHintsOutOpen(false)}
         />
       )}
 

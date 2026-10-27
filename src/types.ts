@@ -95,6 +95,7 @@ export interface ActiveGameState {
   redoStack: GameMoveHistory[];
   lastUpdated: number;
   dailyDate?: string; // "YYYY-MM-DD" when this is a daily challenge
+  hintsLeft?: number; // hints still available (only limited where rewarded ads can refill them)
 }
 
 export interface DailyResult {
