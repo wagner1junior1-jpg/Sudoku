@@ -10,6 +10,7 @@ import {
   User,
   ChevronRight,
   Sparkles,
+  ShieldOff,
   Clock,
   Download,
   Plus,
@@ -50,6 +51,7 @@ interface HomeScreenProps {
   onOpenQuickTheme: () => void;
   onOpenPWAInstall?: () => void;
   onOpenFeedback?: () => void;
+  onOpenRemoveAds?: () => void;
   onUpdateProfile: (newProfile: UserProfile) => void;
 }
 
@@ -72,6 +74,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onOpenQuickTheme,
   onOpenPWAInstall,
   onOpenFeedback,
+  onOpenRemoveAds,
   onUpdateProfile
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
@@ -119,6 +122,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
         </div>
 
         <div className="flex items-center gap-1.5">
+          {/* Remover anúncios (compra única) */}
+          {onOpenRemoveAds && (
+            <button
+              id="btn-remove-ads"
+              onClick={onOpenRemoveAds}
+              className="p-2 rounded-xl bg-amber-500/15 border border-amber-500/30 hover:bg-amber-500/25 transition active:scale-95 cursor-pointer shadow-sm flex items-center justify-center text-amber-500"
+              title="Remover anúncios"
+              aria-label="Remover anúncios"
+            >
+              <ShieldOff className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Developer Feedback / Bug Report (+) Button */}
           {onOpenFeedback && (
             <button

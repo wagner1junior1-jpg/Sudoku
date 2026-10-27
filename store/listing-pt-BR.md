@@ -7,7 +7,7 @@ Sudoku com 5 níveis, dicas inteligentes, notas, temas e conquistas. Jogue offli
 
 **Descrição completa (máx. 4000)**:
 
-Sudoku Master Pro é o jogo de Sudoku feito para o celular: rápido, bonito e 100% offline. Jogue em qualquer lugar, sem internet e sem cadastro. O jogo é gratuito e mostra uma pequena faixa de anúncio na parte de baixo da tela.
+Sudoku Master Pro é o jogo de Sudoku feito para o celular: rápido, bonito e 100% offline. Jogue em qualquer lugar, sem internet e sem cadastro. O jogo é gratuito e mostra uma pequena faixa de anúncio na parte de baixo da tela. Quer jogar sem anúncios? Uma compra única remove todos eles, para sempre.
 
 🧩 5 NÍVEIS DE DIFICULDADE
 Do Fácil, ideal para quem está começando, até o Mestre, para quem gosta de raciocínio profundo. Todos os tabuleiros têm solução única.

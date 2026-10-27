@@ -55,7 +55,7 @@ Textos prontos em [store/listing-pt-BR.md](store/listing-pt-BR.md). Gráficos em
 - **Público-alvo**: **13+** (não marque menores de 13: a política *Families* só permite SDKs de anúncio certificados
   e exigiria outra configuração do AdMob).
 - **Anúncios**: **SIM, contém anúncios** (Google AdMob, faixa inferior).
-- **Compras no app**: não.
+- **Compras no app**: **SIM** — um produto único "Remover anúncios" (ver seção 5.2). Na ficha, a Play mostra "Contém compras no app" sozinha.
 - **ID de publicidade**: declare que o app **usa** (finalidade: publicidade). A permissão `AD_ID` entra sozinha pelo SDK.
 - **Segurança dos dados (Data safety)** — o AdMob coleta/compartilha dados com o Google:
   - Coleta: **Sim** → *Identificadores de dispositivo ou outros* (ID de publicidade), *Localização aproximada* (IP),
@@ -82,6 +82,26 @@ O app está com os **IDs de TESTE do Google**: mostra anúncios de teste e não 
    do EEE/Reino Unido não verão anúncios.
 5. Rode `npm run cap:sync` e gere o AAB de novo (aumente o `versionCode`).
 6. Nunca clique nos seus próprios anúncios de produção (risco de suspensão da conta).
+
+## 5.2 Compra "Remover anúncios" (R$ 3,99)
+
+O app já tem a compra pronta (modal "Remover anúncios" na tela inicial, restauração automática ao abrir o app).
+Falta criar o produto na Play Console e testar:
+
+1. **Perfil de pagamentos:** em Play Console › Configuração › Perfil de pagamentos, preencha os dados do comerciante
+   (obrigatório para vender; contas de pessoa física também precisam do perfil).
+2. **Criar o produto** (só aparece depois de o app ter um AAB com a permissão de cobrança enviado, em qualquer faixa):
+   Monetizar › Produtos › **Produtos no app** › Criar produto:
+   - **ID do produto: `remove_ads`** (exatamente assim; não dá para mudar depois)
+   - Nome: Remover anúncios · Descrição: Remove todos os anúncios do jogo, para sempre.
+   - Preço: **R$ 3,99** (Definir preços: o Google converte para outras moedas) · Status: **Ativo**.
+3. **Testar sem cobrar:** Play Console › Configurações › **Testadores de licença** › adicione seu e-mail Gmail. Instale
+   o app pela faixa de teste interno e compre: aparece "compra de teste, não será cobrado".
+4. Seu e-mail de testador também vê a opção de *reembolsar* a compra para testar a volta dos anúncios.
+
+Detalhes técnicos: compra não consumível, reconhecida automaticamente (a Play reembolsa se não for reconhecida em
+3 dias); ao abrir o app ele consulta as compras da conta Google, então reinstalar ou trocar de aparelho restaura sozinho.
+A validação é no aparelho (sem servidor próprio), suficiente para um jogo de compra única de baixo valor.
 
 ## 6. Fluxo recomendado
 

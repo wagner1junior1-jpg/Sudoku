@@ -9,6 +9,7 @@ import {
 } from "@capacitor-community/admob";
 import type { PluginListenerHandle } from "@capacitor/core";
 import { isNativeApp } from "./platform";
+import { isAdsRemoved } from "./billing";
 
 // ID do bloco de anúncios Banner (AdMob). IDs do AdMob não são segredo.
 // Para testar sem gerar tráfego inválido na conta, compile com VITE_ADMOB_BANNER_ID=ca-app-pub-3940256099942544/6300978111
@@ -61,7 +62,7 @@ function initAdMob(): Promise<boolean> {
  * Só existe no app nativo; `onHeightChange` informa a altura (px CSS) ocupada pela faixa.
  */
 export async function startAdBanner(onHeightChange: (heightPx: number) => void): Promise<void> {
-  if (!isNativeApp || started) return;
+  if (!isNativeApp || started || isAdsRemoved()) return;
   started = true;
 
   try {
@@ -88,6 +89,17 @@ export async function startAdBanner(onHeightChange: (heightPx: number) => void):
   }
 }
 
+/** Chamado quando o jogador compra "remover anúncios": tira a faixa da tela. */
+export async function stopAdBanner(): Promise<void> {
+  if (!isNativeApp) return;
+  started = false;
+  try {
+    await AdMob.removeBanner();
+  } catch {
+    // Sem faixa ativa: nada a remover
+  }
+}
+
 export type RewardedAdResult = "rewarded" | "dismissed" | "unavailable";
 
 // Segurança contra o anúncio nunca avisar que fechou (um vídeo premiado dura bem menos que isto)
@@ -99,6 +111,7 @@ const REWARDED_TIMEOUT_MS = 3 * 60 * 1000;
  * "dismissed": fechou antes de completar; "unavailable": sem anúncio agora (sem internet, sem estoque, etc.).
  */
 export async function showRewardedAd(): Promise<RewardedAdResult> {
+  if (isAdsRemoved()) return "rewarded"; // quem removeu os anúncios ganha a vida extra sem assistir
   if (!isRewardedAdConfigured || !(await initAdMob())) return "unavailable";
 
   const handles: PluginListenerHandle[] = [];

@@ -75,7 +75,9 @@ import { DailyChallengeModal } from "./components/DailyChallengeModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
 import { isNativeApp } from "./utils/platform";
-import { startAdBanner, showRewardedAd, isRewardedAdConfigured, RewardedAdResult } from "./utils/ads";
+import { startAdBanner, stopAdBanner, showRewardedAd, isRewardedAdConfigured, RewardedAdResult } from "./utils/ads";
+import { isAdsRemoved, syncAdsRemoved } from "./utils/billing";
+import { RemoveAdsModal } from "./components/RemoveAdsModal";
 
 export default function App() {
   // Settings & Profile
@@ -126,6 +128,8 @@ export default function App() {
   const [isQuickThemeOpen, setIsQuickThemeOpen] = useState(false);
   const [isPWAInstallOpen, setIsPWAInstallOpen] = useState(false);
   const [isFeedbackOpen, setIsFeedbackOpen] = useState(false);
+  const [isRemoveAdsOpen, setIsRemoveAdsOpen] = useState(false);
+  const [adsRemoved, setAdsRemoved] = useState(() => isAdsRemoved());
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
   const [isPWAInstalled, setIsPWAInstalled] = useState(false);
   const [activeHint, setActiveHint] = useState<HintExplanation | null>(null);
@@ -166,10 +170,20 @@ export default function App() {
     };
   }, []);
 
-  // Faixa de anúncio na base da tela (somente app Android)
+  // Confirma a compra "remover anúncios" com a Google Play (restaura em aparelho novo, desfaz após reembolso)
   useEffect(() => {
-    startAdBanner(setAdBannerHeight);
+    syncAdsRemoved().then(setAdsRemoved);
   }, []);
+
+  // Faixa de anúncio na base da tela (somente app Android e enquanto os anúncios não foram removidos)
+  useEffect(() => {
+    if (adsRemoved) {
+      stopAdBanner();
+      setAdBannerHeight(0);
+    } else {
+      startAdBanner(setAdBannerHeight);
+    }
+  }, [adsRemoved]);
 
   // Sound effects sync
   useEffect(() => {
@@ -860,6 +874,7 @@ export default function App() {
   const backHandlerRef = useRef<() => void>(() => {});
   backHandlerRef.current = () => {
     if (isFeedbackOpen) return setIsFeedbackOpen(false);
+    if (isRemoveAdsOpen) return setIsRemoveAdsOpen(false);
     if (activeHint) return setActiveHint(null);
     if (isHowToPlayOpen) return setIsHowToPlayOpen(false);
     if (isSettingsOpen) return setIsSettingsOpen(false);
@@ -926,6 +941,7 @@ export default function App() {
           onOpenQuickTheme={() => setIsQuickThemeOpen(true)}
           onOpenPWAInstall={() => setIsPWAInstallOpen(true)}
           onOpenFeedback={() => setIsFeedbackOpen(true)}
+          onOpenRemoveAds={isNativeApp && !adsRemoved ? () => setIsRemoveAdsOpen(true) : undefined}
           onUpdateProfile={(newProfile) => {
             setUserProfile(newProfile);
             saveUserProfile(newProfile);
@@ -1133,6 +1149,15 @@ export default function App() {
           inProgressDate={savedGame?.dailyDate}
           onPlay={handlePlayDaily}
           onClose={() => setIsDailyOpen(false)}
+        />
+      )}
+
+      {isRemoveAdsOpen && (
+        <RemoveAdsModal
+          themeId={settings.theme}
+          adsRemoved={adsRemoved}
+          onAdsRemoved={() => setAdsRemoved(true)}
+          onClose={() => setIsRemoveAdsOpen(false)}
         />
       )}
 
