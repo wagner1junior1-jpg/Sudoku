@@ -30,7 +30,9 @@ export interface GameMoveHistory {
   newValue: number;
   prevNotes: number[];
   newNotes: number[];
-  type: "value" | "note" | "erase" | "hint";
+  type: "value" | "note" | "erase" | "hint" | "fill_notes";
+  // fill_notes changes the notes of many cells at once, undone/redone as a single move
+  cells?: { row: number; col: number; prevNotes: number[]; newNotes: number[] }[];
 }
 
 export interface GameHistoryItem {

@@ -18,6 +18,7 @@ import {
   generateSudokuPuzzle,
   detectConflicts,
   generateSmartHint,
+  getCellCandidates,
   calculateMatchScore,
   getNumberCounts,
   isBoardCompleted
@@ -527,6 +528,59 @@ export default function App() {
     if (settings.hapticEnabled) soundEffects.triggerHaptic(15);
   }, [board, selectedPos, gameStatus, settings.hapticEnabled]);
 
+  // Sets the notes of several cells at once (used to undo/redo a fill_notes move)
+  const applyNotesBatch = (
+    current: BoardMatrix,
+    cells: NonNullable<GameMoveHistory["cells"]>,
+    which: "prevNotes" | "newNotes"
+  ): BoardMatrix => {
+    const notesByCell = new Map(cells.map((c) => [c.row * 9 + c.col, c[which]]));
+    return current.map((r, rIdx) =>
+      r.map((c, cIdx) => {
+        const notes = notesByCell.get(rIdx * 9 + cIdx);
+        return notes ? { ...c, notes: [...notes] } : c;
+      })
+    );
+  };
+
+  // Fill pencil marks with every candidate in empty cells that have no notes yet
+  const handleFillNotes = useCallback(() => {
+    if (gameStatus !== "playing") return;
+
+    // Wrong numbers would hide the true candidates of their peers, so they are ignored
+    const trusted = board.map((r) =>
+      r.map((c) => (c.value === c.solutionValue ? c : { ...c, value: 0 }))
+    );
+    const cells = board.flatMap((r) =>
+      r
+        .filter((c) => c.value === 0 && c.notes.length === 0)
+        .map((c) => ({
+          row: c.row,
+          col: c.col,
+          prevNotes: [] as number[],
+          newNotes: getCellCandidates(trusted, c.row, c.col)
+        }))
+    );
+    if (cells.length === 0) return;
+
+    const move: GameMoveHistory = {
+      row: cells[0].row,
+      col: cells[0].col,
+      prevValue: 0,
+      newValue: 0,
+      prevNotes: [],
+      newNotes: [], // keeps auto-fill from counting as hand-written notes for achievements
+      type: "fill_notes",
+      cells
+    };
+
+    setBoard(applyNotesBatch(board, cells, "newNotes"));
+    setHistoryStack((prev) => [...prev, move]);
+    setRedoStack([]);
+    soundEffects.playNoteTick();
+    if (settings.hapticEnabled) soundEffects.triggerHaptic(15);
+  }, [board, gameStatus, settings.hapticEnabled]);
+
   // Undo Move
   const handleUndo = useCallback(() => {
     if (historyStack.length === 0 || gameStatus !== "playing") return;
@@ -534,19 +588,21 @@ export default function App() {
     const lastMove = historyStack[historyStack.length - 1];
     const newHistory = historyStack.slice(0, -1);
 
-    const newBoard = board.map((r, rIdx) =>
-      r.map((c, cIdx) => {
-        if (rIdx === lastMove.row && cIdx === lastMove.col) {
-          return {
-            ...c,
-            value: lastMove.prevValue,
-            notes: lastMove.prevNotes,
-            isError: false
-          };
-        }
-        return c;
-      })
-    );
+    const newBoard = lastMove.cells
+      ? applyNotesBatch(board, lastMove.cells, "prevNotes")
+      : board.map((r, rIdx) =>
+          r.map((c, cIdx) => {
+            if (rIdx === lastMove.row && cIdx === lastMove.col) {
+              return {
+                ...c,
+                value: lastMove.prevValue,
+                notes: lastMove.prevNotes,
+                isError: false
+              };
+            }
+            return c;
+          })
+        );
 
     setBoard(newBoard);
     setHistoryStack(newHistory);
@@ -562,19 +618,21 @@ export default function App() {
     const nextMove = redoStack[redoStack.length - 1];
     const newRedo = redoStack.slice(0, -1);
 
-    const newBoard = board.map((r, rIdx) =>
-      r.map((c, cIdx) => {
-        if (rIdx === nextMove.row && cIdx === nextMove.col) {
-          return {
-            ...c,
-            value: nextMove.newValue,
-            notes: nextMove.newNotes,
-            isError: false
-          };
-        }
-        return c;
-      })
-    );
+    const newBoard = nextMove.cells
+      ? applyNotesBatch(board, nextMove.cells, "newNotes")
+      : board.map((r, rIdx) =>
+          r.map((c, cIdx) => {
+            if (rIdx === nextMove.row && cIdx === nextMove.col) {
+              return {
+                ...c,
+                value: nextMove.newValue,
+                notes: nextMove.newNotes,
+                isError: false
+              };
+            }
+            return c;
+          })
+        );
 
     setBoard(newBoard);
     setRedoStack(newRedo);
@@ -870,6 +928,7 @@ export default function App() {
             onUndo={handleUndo}
             onRedo={handleRedo}
             onHint={handleRequestHint}
+            onFillNotes={handleFillNotes}
             onToggleInputMode={() =>
               setSettings((prev) => {
                 const nextMode = prev.inputMode === "cell-first" ? "number-first" : "cell-first";

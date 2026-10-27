@@ -5,6 +5,7 @@ import {
   Eraser,
   Pencil,
   Sparkles,
+  WandSparkles,
   MousePointerClick,
   Hash
 } from "lucide-react";
@@ -25,6 +26,7 @@ interface SudokuPadProps {
   onUndo: () => void;
   onRedo: () => void;
   onHint: () => void;
+  onFillNotes: () => void;
   onToggleInputMode: () => void;
 }
 
@@ -42,6 +44,7 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
   onUndo,
   onRedo,
   onHint,
+  onFillNotes,
   onToggleInputMode
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
@@ -95,14 +98,14 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
           })}
         </div>
 
-        {/* Bottom Actions Row: 5 Thumb Controls (Undo, Redo, Erase, Notes, Hint) */}
-        <div className="grid grid-cols-5 gap-1 sm:gap-1.5 pt-1.5 border-t border-white/10">
+        {/* Bottom Actions Row: 6 Thumb Controls (Undo, Redo, Erase, Notes, Auto-notes, Hint) */}
+        <div className="grid grid-cols-6 gap-1 sm:gap-1.5 pt-1.5 border-t border-white/10">
           {/* Undo */}
           <button
             id="btn-action-undo"
             onClick={onUndo}
             disabled={!canUndo}
-            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
               canUndo
                 ? `${currentTheme.buttonBg} active:scale-95 shadow-sm`
                 : "opacity-35 cursor-not-allowed bg-black/20 text-slate-500 border border-transparent"
@@ -110,7 +113,7 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
             title="Desfazer jogada"
           >
             <Undo2 className="w-4 h-4" />
-            <span className="text-[10px]">Desfazer</span>
+            <span className="text-[9px] min-[380px]:text-[10px]">Desfazer</span>
           </button>
 
           {/* Redo */}
@@ -118,7 +121,7 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
             id="btn-action-redo"
             onClick={onRedo}
             disabled={!canRedo}
-            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
+            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal transition cursor-pointer flex flex-col items-center justify-center gap-0.5 ${
               canRedo
                 ? `${currentTheme.buttonBg} active:scale-95 shadow-sm`
                 : "opacity-35 cursor-not-allowed bg-black/20 text-slate-500 border border-transparent"
@@ -126,25 +129,25 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
             title="Refazer jogada"
           >
             <Redo2 className="w-4 h-4" />
-            <span className="text-[10px]">Refazer</span>
+            <span className="text-[9px] min-[380px]:text-[10px]">Refazer</span>
           </button>
 
           {/* Erase */}
           <button
             id="btn-action-erase"
             onClick={onErase}
-            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-wider ${currentTheme.buttonBg} transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 shadow-sm`}
+            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal ${currentTheme.buttonBg} transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 shadow-sm`}
             title="Apagar célula"
           >
             <Eraser className="w-4 h-4 text-rose-400" />
-            <span className="text-[10px]">Apagar</span>
+            <span className="text-[9px] min-[380px]:text-[10px]">Apagar</span>
           </button>
 
           {/* Notes (Pencil Mode) */}
           <button
             id="btn-action-notes"
             onClick={onToggleNotes}
-            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-wider transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 shadow-sm ${
+            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 shadow-sm ${
               isNotesMode
                 ? `${currentTheme.buttonActiveBg} font-bold ring-2 ring-white/40`
                 : currentTheme.buttonBg
@@ -152,18 +155,29 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
             title="Modo Notas / Rascunho"
           >
             <Pencil className="w-4 h-4" />
-            <span className="text-[10px]">{isNotesMode ? "Notas ON" : "Notas"}</span>
+            <span className="text-[9px] min-[380px]:text-[10px]">{isNotesMode ? "Notas ON" : "Notas"}</span>
+          </button>
+
+          {/* Auto-fill all candidate notes */}
+          <button
+            id="btn-action-fill-notes"
+            onClick={onFillNotes}
+            className={`py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal ${currentTheme.buttonBg} transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 shadow-sm`}
+            title="Preencher anotações das casas vazias"
+          >
+            <WandSparkles className="w-4 h-4 text-violet-400" />
+            <span className="text-[9px] min-[380px]:text-[10px]">Auto</span>
           </button>
 
           {/* Hint Button */}
           <button
             id="btn-action-hint"
             onClick={onHint}
-            className="py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-wider bg-gradient-to-tr from-amber-500 to-amber-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md shadow-amber-500/25 transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 border border-amber-300/40"
+            className="py-1.5 sm:py-2 rounded-xl text-xs font-semibold uppercase tracking-normal bg-gradient-to-tr from-amber-500 to-amber-400 hover:from-amber-400 hover:to-yellow-300 text-slate-950 shadow-md shadow-amber-500/25 transition active:scale-95 cursor-pointer flex flex-col items-center justify-center gap-0.5 border border-amber-300/40"
             title="Pedir Dica"
           >
             <Sparkles className="w-4 h-4 text-slate-950 fill-slate-950/20" />
-            <span className="text-[10px] font-bold">Dica</span>
+            <span className="text-[9px] min-[380px]:text-[10px] font-bold">Dica</span>
           </button>
         </div>
       </div>
