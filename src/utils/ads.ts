@@ -17,10 +17,10 @@ import { isAdsRemoved } from "./billing";
 const BANNER_ID =
   (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || "ca-app-pub-1871959449564340/8100817372";
 
-// ID do bloco de anúncios Premiado (AdMob). Precisa ser criado no AdMob (formato "Premiado");
-// enquanto não houver ID, o botão de assistir anúncio fica escondido. Para testar sem gerar tráfego
-// inválido, compile com VITE_ADMOB_REWARDED_ID=ca-app-pub-3940256099942544/5224354917 (ID de teste do Google).
-const REWARDED_ID = (import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined) || "";
+// ID do bloco de anúncios Premiado "Vida Extra" (AdMob). Para testar sem gerar tráfego inválido na conta,
+// compile com VITE_ADMOB_REWARDED_ID=ca-app-pub-3940256099942544/5224354917 (ID de teste do Google).
+const REWARDED_ID =
+  (import.meta.env.VITE_ADMOB_REWARDED_ID as string | undefined) || "ca-app-pub-1871959449564340/2130305396";
 
 export const isRewardedAdConfigured = isNativeApp && REWARDED_ID !== "";
 
