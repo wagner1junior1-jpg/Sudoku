@@ -1,20 +1,24 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Sudoku Master Pro
 
-# Run and deploy your AI Studio app
+Jogo de Sudoku 100% offline (React + Vite + Tailwind) empacotado para Android com Capacitor.
 
-This contains everything you need to run your app locally.
+## Desenvolvimento
 
-View your app in AI Studio: https://ai.studio/apps/176fcc9b-9eda-4426-a29a-2006ec94cb94
+```bash
+npm install
+npm run dev        # servidor local em http://localhost:3000
+npm run lint       # checagem de tipos (tsc)
+```
 
-## Run Locally
+## Android
 
-**Prerequisites:**  Node.js
+Requer **JDK 21** (o JBR do Android Studio recente é Java 25 e quebra o Gradle 8.14) e Android SDK.
 
+```bash
+npm run cap:sync   # vite build + cap sync android
+cd android
+./gradlew assembleDebug     # APK de teste
+./gradlew bundleRelease     # AAB para a Play Store (assinado se keystore.properties existir)
+```
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+Publicação na Google Play: veja [PLAY_STORE.md](PLAY_STORE.md).

@@ -1,7 +1,7 @@
 import React from "react";
 import { Sparkles, X, Check, HelpCircle } from "lucide-react";
 import { HintExplanation, ThemeId } from "../types";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface HintModalProps {
   hint: HintExplanation;
@@ -16,7 +16,7 @@ export const HintModal: React.FC<HintModalProps> = ({
   onApplyHint,
   onClose
 }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4">

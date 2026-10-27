@@ -13,7 +13,7 @@ export const PauseOverlay: React.FC<PauseOverlayProps> = ({ themeId, onResume, o
   const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
 
   return (
-    <div className="absolute inset-0 z-20 backdrop-blur-md bg-slate-950/75 flex items-center justify-center p-4 rounded-2xl animate-fade-in">
+    <div className="absolute inset-0 z-40 backdrop-blur-md bg-slate-950/75 flex items-center justify-center p-4 rounded-2xl animate-fade-in">
       <div className={`w-full max-w-xs p-6 rounded-2xl ${currentTheme.cardBg} border text-center shadow-2xl flex flex-col items-center gap-4`}>
         <div className="w-14 h-14 rounded-2xl bg-amber-500/20 border border-amber-500/30 flex items-center justify-center text-amber-400">
           <Pause className="w-7 h-7 fill-amber-400/20" />

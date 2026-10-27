@@ -2,7 +2,7 @@ import React from "react";
 import { PlusCircle, X, Sparkles, Zap, Flame, ShieldAlert, Award } from "lucide-react";
 import { DifficultyLevel, ThemeId } from "../types";
 import { DIFFICULTY_CONFIG } from "../utils/sudokuEngine";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface NewGameModalProps {
   currentDifficulty: DifficultyLevel;
@@ -11,13 +11,19 @@ interface NewGameModalProps {
   onClose: () => void;
 }
 
+// Nos níveis mais difíceis o gerador remove o máximo possível mantendo solução única, então a contagem varia
+const CLUES_LABEL: Partial<Record<DifficultyLevel, string>> = {
+  especialista: "≈25",
+  mestre: "≈24"
+};
+
 export const NewGameModal: React.FC<NewGameModalProps> = ({
   currentDifficulty,
   themeId,
   onSelectDifficulty,
   onClose
 }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
 
   const difficulties: { key: DifficultyLevel; icon: React.ReactNode }[] = [
     { key: "facil", icon: <Sparkles className="w-5 h-5 text-emerald-400" /> },
@@ -79,7 +85,7 @@ export const NewGameModal: React.FC<NewGameModalProps> = ({
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-sm text-slate-100">{config.label}</span>
                       <span className="text-[10px] text-slate-400 font-mono">
-                        ({config.clues} pistas)
+                        ({CLUES_LABEL[key] ?? config.clues} pistas)
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">

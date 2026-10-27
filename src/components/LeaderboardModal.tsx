@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { DifficultyLevel, LeaderboardItem, ThemeId } from "../types";
 import { formatTime, DIFFICULTY_CONFIG } from "../utils/sudokuEngine";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface LeaderboardModalProps {
   currentDifficulty: DifficultyLevel;
@@ -28,7 +28,7 @@ export const LeaderboardModal: React.FC<LeaderboardModalProps> = ({
   onClearLocalRecords,
   onClose
 }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
   const [selectedDiff, setSelectedDiff] = useState<DifficultyLevel>(currentDifficulty);
 
   // Filter and sort records for selected difficulty

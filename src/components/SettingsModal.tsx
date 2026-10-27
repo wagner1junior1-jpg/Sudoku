@@ -14,7 +14,7 @@ import {
   Check
 } from "lucide-react";
 import { GameSettings, ThemeId, UserProfile } from "../types";
-import { THEMES } from "../utils/themes";
+import { THEMES, getModalTheme } from "../utils/themes";
 
 interface SettingsModalProps {
   settings: GameSettings;
@@ -31,7 +31,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onUpdateProfile,
   onClose
 }) => {
-  const currentTheme = THEMES[settings.theme] || THEMES["light-classic"];
+  const currentTheme = getModalTheme(settings.theme);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">

@@ -15,7 +15,7 @@ import {
 import { GameHistoryItem, ThemeId, DifficultyLevel } from "../types";
 import { formatTime, DIFFICULTY_CONFIG } from "../utils/sudokuEngine";
 import { calculatePlayerStats } from "../utils/storage";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface HistoryModalProps {
   history: GameHistoryItem[];
@@ -30,7 +30,7 @@ export const HistoryModal: React.FC<HistoryModalProps> = ({
   onClearHistory,
   onClose
 }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
   const [filterDiff, setFilterDiff] = useState<DifficultyLevel | "all">("all");
   const stats = calculatePlayerStats(history);
 

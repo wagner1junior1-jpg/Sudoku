@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { App as CapacitorApp } from "@capacitor/app";
+import { SystemBars, SystemBarsStyle } from "@capacitor/core";
 import {
   DifficultyLevel,
   BoardMatrix,
@@ -60,6 +62,7 @@ import { PWAUpdateToast } from "./components/PWAUpdateToast";
 import { FeedbackModal } from "./components/FeedbackModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
+import { isNativeApp } from "./utils/platform";
 
 export default function App() {
   // Settings & Profile
@@ -68,9 +71,10 @@ export default function App() {
 
   // Active Game State
   const [difficulty, setDifficulty] = useState<DifficultyLevel>("facil");
-  const [board, setBoard] = useState<BoardMatrix>(() => generateSudokuPuzzle("facil").board);
-  const [solution, setSolution] = useState<number[][]>(() => generateSudokuPuzzle("facil").solution);
-  const [initialGrid, setInitialGrid] = useState<number[][]>(() => generateSudokuPuzzle("facil").initialGrid);
+  const [firstPuzzle] = useState(() => generateSudokuPuzzle("facil"));
+  const [board, setBoard] = useState<BoardMatrix>(firstPuzzle.board);
+  const [solution, setSolution] = useState<number[][]>(firstPuzzle.solution);
+  const [initialGrid, setInitialGrid] = useState<number[][]>(firstPuzzle.initialGrid);
 
   const [selectedPos, setSelectedPos] = useState<CellPosition | null>({ row: 4, col: 4 });
   const [selectedNumber, setSelectedNumber] = useState<number | null>(null);
@@ -122,7 +126,9 @@ export default function App() {
     };
 
     const checkStandalone = () => {
+      // App nativo (Play Store) nunca deve oferecer a instalação como PWA
       const standalone =
+        isNativeApp ||
         window.matchMedia("(display-mode: standalone)").matches ||
         (window.navigator as unknown as { standalone?: boolean }).standalone === true;
       setIsPWAInstalled(Boolean(standalone));
@@ -399,11 +405,31 @@ export default function App() {
     }
   }, [mistakes, gameStatus, hasContinuedPastLimit]);
 
+  // Partida perdida não pode ser retomada pela tela inicial
+  useEffect(() => {
+    if (gameStatus === "game_over") {
+      clearActiveGame();
+      setSavedGame(null);
+    }
+  }, [gameStatus]);
+
+  // Pausa automaticamente quando o app vai para segundo plano
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === "hidden") {
+        setGameStatus((prev) => (prev === "playing" ? "paused" : prev));
+      }
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+    return () => document.removeEventListener("visibilitychange", handleVisibility);
+  }, []);
+
   // Handle Win Completion
   const handleVictory = (finalBoard: BoardMatrix) => {
     soundEffects.playVictory();
     setGameStatus("completed");
     clearActiveGame();
+    setSavedGame(null);
 
     const finalScore =
       hasContinuedPastLimit || mistakes >= 3
@@ -688,11 +714,44 @@ export default function App() {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [selectedPos, handleInputDigit, handleErase, handleUndo, handleRedo, handleRequestHint]);
 
+  // Botão voltar do Android: fecha modais, depois pausa/volta ao menu e só então sai do app
+  const backHandlerRef = useRef<() => void>(() => {});
+  backHandlerRef.current = () => {
+    if (isFeedbackOpen) return setIsFeedbackOpen(false);
+    if (activeHint) return setActiveHint(null);
+    if (isHowToPlayOpen) return setIsHowToPlayOpen(false);
+    if (isSettingsOpen) return setIsSettingsOpen(false);
+    if (isQuickThemeOpen) return setIsQuickThemeOpen(false);
+    if (isHistoryOpen) return setIsHistoryOpen(false);
+    if (isLeaderboardOpen) return setIsLeaderboardOpen(false);
+    if (isAchievementsOpen) return setIsAchievementsOpen(false);
+    if (isNewGameOpen) return setIsNewGameOpen(false);
+    if (gameStatus === "playing") return setGameStatus("paused");
+    if (gameStatus !== "home") return setGameStatus("home");
+    CapacitorApp.exitApp();
+  };
+
+  useEffect(() => {
+    if (!isNativeApp) return;
+    const listener = CapacitorApp.addListener("backButton", () => backHandlerRef.current());
+    return () => {
+      listener.then((handle) => handle.remove());
+    };
+  }, []);
+
   const currentTheme = THEMES[settings.theme] || THEMES["light-classic"];
+
+  // Ícones da barra de status/navegação legíveis tanto em temas claros quanto escuros
+  useEffect(() => {
+    if (!isNativeApp) return;
+    SystemBars.setStyle({
+      style: currentTheme.category === "dark" ? SystemBarsStyle.Dark : SystemBarsStyle.Light
+    }).catch(() => {});
+  }, [currentTheme.category]);
 
   return (
     <div
-      className={`h-[100dvh] max-h-[100dvh] w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between max-w-md mx-auto select-none overflow-hidden transition-colors duration-300 font-['Plus_Jakarta_Sans']`}
+      className={`h-[100dvh] max-h-[100dvh] w-full pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between max-w-md mx-auto select-none overflow-hidden transition-colors duration-300 font-['Plus_Jakarta_Sans']`}
     >
       {/* Home Screen / Main Menu */}
       {gameStatus === "home" ? (
@@ -933,7 +992,7 @@ export default function App() {
       )}
 
       {/* PWA Background Update Toast */}
-      <PWAUpdateToast />
+      {!isNativeApp && <PWAUpdateToast />}
 
       {/* Real-time Achievement Unlock Toast */}
       {activeAchievementToast && (

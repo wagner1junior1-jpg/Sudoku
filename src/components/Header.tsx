@@ -51,11 +51,11 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="w-full max-w-md mx-auto px-1 sm:px-2 pt-0.5 pb-1 flex items-center justify-between gap-1.5 select-none">
       {/* Home / Back & Level Pill */}
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-1.5 min-w-0">
         <button
           id="btn-header-home"
           onClick={onGoHome}
-          className={`p-1.5 rounded-lg ${currentTheme.buttonBg} transition active:scale-95 flex items-center justify-center cursor-pointer`}
+          className={`p-1.5 rounded-lg ${currentTheme.buttonBg} transition active:scale-95 flex items-center justify-center cursor-pointer shrink-0`}
           title="Voltar ao Menu Principal"
           aria-label="Menu Inicial"
         >
@@ -64,7 +64,7 @@ export const Header: React.FC<HeaderProps> = ({
 
         <button
           onClick={onOpenNewGame}
-          className="text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 active:scale-95 transition cursor-pointer"
+          className="min-w-0 truncate text-[10px] uppercase font-bold tracking-wider px-2 py-1 rounded-lg bg-blue-500/15 text-blue-400 border border-blue-500/30 hover:bg-blue-500/25 active:scale-95 transition cursor-pointer"
           title="Mudar Dificuldade / Novo Jogo"
         >
           {diffInfo.label}
@@ -72,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       {/* Action Navigation Buttons */}
-      <div className="flex items-center gap-1">
+      <div className="flex items-center gap-1 shrink-0">
         {/* PWA Install Shortcut if available */}
         {!isPWAInstalled && onOpenPWAInstall && (
           <button

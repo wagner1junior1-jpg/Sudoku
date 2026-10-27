@@ -1,7 +1,7 @@
 import React from "react";
 import { HelpCircle, X, CheckCircle, BookOpen, Lightbulb, Keyboard } from "lucide-react";
 import { ThemeId } from "../types";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface HowToPlayModalProps {
   themeId: ThemeId;
@@ -9,7 +9,7 @@ interface HowToPlayModalProps {
 }
 
 export const HowToPlayModal: React.FC<HowToPlayModalProps> = ({ themeId, onClose }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
 
   return (
     <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-3 sm:p-4 overflow-y-auto">

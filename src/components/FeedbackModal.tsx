@@ -11,7 +11,7 @@ import {
   Phone
 } from "lucide-react";
 import { ThemeId } from "../types";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface FeedbackModalProps {
   themeId: ThemeId;
@@ -19,7 +19,7 @@ interface FeedbackModalProps {
 }
 
 export const FeedbackModal: React.FC<FeedbackModalProps> = ({ themeId, onClose }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
   const [copied, setCopied] = useState(false);
 
   const rawNumber = "5562992549588";
@@ -29,10 +29,14 @@ export const FeedbackModal: React.FC<FeedbackModalProps> = ({ themeId, onClose }
   );
   const whatsappUrl = `https://wa.me/${rawNumber}?text=${defaultMessage}`;
 
-  const handleCopyNumber = () => {
-    navigator.clipboard.writeText("62992549588");
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+  const handleCopyNumber = async () => {
+    try {
+      await navigator.clipboard.writeText("62992549588");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch {
+      // Clipboard indisponível: o número continua visível na tela
+    }
   };
 
   return (

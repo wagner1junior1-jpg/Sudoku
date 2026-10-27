@@ -318,3 +318,10 @@ export const THEMES: Record<ThemeId, ThemeConfig> = {
     buttonActiveBg: "bg-[#7f5539] text-[#fcf9f2] shadow-md shadow-[#7f5539]/30"
   }
 };
+
+// Modais foram desenhados com superfícies escuras: em temas claros usam o tema escuro padrão
+// para manter o contraste de textos e cartões internos.
+export function getModalTheme(themeId: ThemeId): ThemeConfig {
+  const theme = THEMES[themeId] || THEMES["dark-slate"];
+  return theme.category === "light" ? THEMES["dark-slate"] : theme;
+}

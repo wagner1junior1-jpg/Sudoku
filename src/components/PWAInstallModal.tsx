@@ -12,7 +12,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { ThemeId } from "../types";
-import { THEMES } from "../utils/themes";
+import { getModalTheme } from "../utils/themes";
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -32,7 +32,7 @@ export const PWAInstallModal: React.FC<PWAInstallModalProps> = ({
   onClose,
   onInstallSuccess
 }) => {
-  const currentTheme = THEMES[themeId] || THEMES["dark-slate"];
+  const currentTheme = getModalTheme(themeId);
   const [isIOS, setIsIOS] = useState(false);
   const [isStandalone, setIsStandalone] = useState(false);
   const [installing, setInstalling] = useState(false);
