@@ -8,7 +8,7 @@ Pacote: `com.sudokumasterpro.app` · versão atual: `1.0.0` (versionCode `1`)
    - Contas **pessoais** novas precisam de **teste fechado com 12+ testadores por 14 dias** antes de liberar para produção.
 2. **Política de privacidade publicada** (exigida pela Play). O arquivo já está em
    `public/politica-de-privacidade.html`; após o deploy na Vercel a URL fica
-   `https://SEU-DOMINIO/politica-de-privacidade`. Abra no navegador e confirme que carrega antes de enviar à Play.
+   `https://sudoku-chi-two.vercel.app/politica-de-privacidade`. Abra no navegador e confirme que carrega antes de enviar à Play.
 3. JDK 21 e Android SDK (ver README).
 
 ## 2. Chave de upload (JÁ GERADA)
@@ -63,7 +63,7 @@ Textos prontos em [store/listing-pt-BR.md](store/listing-pt-BR.md). Gráficos em
   - Se você reativar o Google Analytics dentro do app, será preciso declarar "ID do dispositivo / interações
     do app" coletados e atualizar a política de privacidade.
 - **Permissões**: `INTERNET` e `VIBRATE` (sem permissões sensíveis).
-- **Categoria**: Jogos › Quebra-cabeça. **Contato**: informe um e-mail público de suporte (obrigatório na Play).
+- **Categoria**: Jogos › Quebra-cabeça. **Contato**: e-mail de suporte público: `wagner1junior1@gmail.com` (obrigatório na Play).
 - **Acesso ao app**: sem login, tudo acessível.
 
 ## 6. Fluxo recomendado
@@ -76,8 +76,7 @@ Textos prontos em [store/listing-pt-BR.md](store/listing-pt-BR.md). Gráficos em
 
 ## 7. Itens que dependem de você
 
-- [ ] Fazer deploy da web (Vercel) para a URL da política de privacidade existir.
+- [ ] Fazer push/deploy na Vercel e conferir que https://sudoku-chi-two.vercel.app/politica-de-privacidade abre.
 - [ ] Fazer backup da pasta de chaves (item 2).
-- [ ] E-mail de suporte público na Play Console (o número de WhatsApp do desenvolvedor aparece dentro do app e
-      na política de privacidade como canal de contato).
+- [ ] Informar `wagner1junior1@gmail.com` como e-mail de suporte na Play Console (já consta na política de privacidade).
 - [ ] Decidir se mantém o Google Analytics apenas na versão web (estado atual) ou também no app.
