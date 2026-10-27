@@ -1,7 +1,8 @@
-import React from "react";
-import { AlertOctagon, RotateCcw, ShieldAlert, HeartHandshake, Home } from "lucide-react";
+import React, { useState } from "react";
+import { AlertOctagon, RotateCcw, ShieldAlert, HeartHandshake, Home, Clapperboard, Loader2 } from "lucide-react";
 import { DifficultyLevel, ThemeId } from "../types";
 import { THEMES } from "../utils/themes";
+import type { RewardedAdResult } from "../utils/ads";
 
 interface GameOverModalProps {
   difficulty: DifficultyLevel;
@@ -10,15 +11,25 @@ interface GameOverModalProps {
   onRestart: () => void;
   onContinueUnlimited: () => void;
   onGoHome?: () => void;
+  // When present, offers a rewarded ad that gives one mistake back (keeps the score)
+  onWatchAd?: () => Promise<RewardedAdResult>;
 }
 
 export const GameOverModal: React.FC<GameOverModalProps> = ({
   themeId,
   onRestart,
   onContinueUnlimited,
-  onGoHome
+  onGoHome,
+  onWatchAd
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
+  const [adState, setAdState] = useState<"idle" | "loading" | RewardedAdResult>("idle");
+
+  const handleWatchAd = async () => {
+    if (!onWatchAd || adState === "loading") return;
+    setAdState("loading");
+    setAdState(await onWatchAd());
+  };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in">
@@ -52,6 +63,34 @@ export const GameOverModal: React.FC<GameOverModalProps> = ({
             <RotateCcw className="w-4 h-4" />
             <span>Sim, Iniciar Novamente</span>
           </button>
+
+          {onWatchAd && (
+            <>
+              <button
+                id="btn-watch-ad-continue"
+                onClick={handleWatchAd}
+                disabled={adState === "loading"}
+                className="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:opacity-70 text-white font-bold text-xs shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition active:scale-95 cursor-pointer disabled:cursor-wait"
+              >
+                {adState === "loading" ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Clapperboard className="w-4 h-4" />
+                )}
+                <span>{adState === "loading" ? "Carregando anúncio…" : "Assistir anúncio e continuar (2/3 erros)"}</span>
+              </button>
+              {adState === "dismissed" && (
+                <p className="text-[11px] text-amber-500 font-semibold -mt-1">
+                  Assista até o final para ganhar a vida extra.
+                </p>
+              )}
+              {adState === "unavailable" && (
+                <p className="text-[11px] text-amber-500 font-semibold -mt-1">
+                  Anúncio indisponível agora. Tente de novo em instantes.
+                </p>
+              )}
+            </>
+          )}
 
           <button
             onClick={onContinueUnlimited}

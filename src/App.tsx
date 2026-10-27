@@ -75,7 +75,7 @@ import { DailyChallengeModal } from "./components/DailyChallengeModal";
 import { evaluateAchievements } from "./utils/achievements";
 import { Achievement } from "./types";
 import { isNativeApp } from "./utils/platform";
-import { startAdBanner } from "./utils/ads";
+import { startAdBanner, showRewardedAd, isRewardedAdConfigured, RewardedAdResult } from "./utils/ads";
 
 export default function App() {
   // Settings & Profile
@@ -132,6 +132,7 @@ export default function App() {
   const [recentUnlockedAchievements, setRecentUnlockedAchievements] = useState<Achievement[]>([]);
   const [activeAchievementToast, setActiveAchievementToast] = useState<Achievement | null>(null);
   const [hasContinuedPastLimit, setHasContinuedPastLimit] = useState(false);
+  const [adContinueUsed, setAdContinueUsed] = useState(false); // 1 vida extra por anúncio, uma vez por partida
   const [adBannerHeight, setAdBannerHeight] = useState(0);
 
   // Detect PWA installation and listen for install prompts
@@ -198,6 +199,7 @@ export default function App() {
       setHistoryStack(saved.historyStack || []);
       setRedoStack(saved.redoStack || []);
       setDailyDate(saved.dailyDate ?? null);
+      setAdContinueUsed(false);
       setGameStatus("playing");
       setIsNotesMode(false);
       setActiveHint(null);
@@ -295,10 +297,22 @@ export default function App() {
     setRedoStack([]);
     setGameStatus("playing");
     setHasContinuedPastLimit(false);
+    setAdContinueUsed(false);
     setIsNotesMode(false);
     setActiveHint(null);
     setIsNewGameOpen(false);
   }, []);
+
+  // Rewarded ad after the 3rd mistake: watching it to the end gives one mistake back and keeps the score
+  const handleWatchAdToContinue = async (): Promise<RewardedAdResult> => {
+    const result = await showRewardedAd();
+    if (result === "rewarded") {
+      setAdContinueUsed(true);
+      setMistakes(2);
+      setGameStatus("playing");
+    }
+    return result;
+  };
 
   // Play a daily challenge, resuming it if it was left mid-game
   const handlePlayDaily = (dateKey: string) => {
@@ -1160,6 +1174,11 @@ export default function App() {
           mistakes={mistakes}
           themeId={settings.theme}
           onRestart={() => startNewGame(difficulty, dailyDate)}
+          onWatchAd={
+            isRewardedAdConfigured && !adContinueUsed && !hasContinuedPastLimit
+              ? handleWatchAdToContinue
+              : undefined
+          }
           onContinueUnlimited={() => {
             setHasContinuedPastLimit(true);
             setScore(0);
