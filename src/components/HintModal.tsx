@@ -48,7 +48,7 @@ export const HintModal: React.FC<HintModalProps> = ({
 
         {/* Explanation body */}
         <div className="p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-xs text-slate-200 leading-relaxed">
-          <p>{hint.explanation}</p>
+          <p className="whitespace-pre-line max-h-[45vh] overflow-y-auto">{hint.explanation}</p>
 
           <div className="mt-3 flex items-center justify-between pt-3 border-t border-slate-800 text-xs">
             <span className="text-slate-400">Valor a preencher:</span>

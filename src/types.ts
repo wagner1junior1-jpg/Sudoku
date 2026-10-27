@@ -95,7 +95,7 @@ export interface ActiveGameState {
 }
 
 export interface HintExplanation {
-  type: "naked_single" | "hidden_single" | "advanced_logic";
+  type: "naked_single" | "hidden_single" | "advanced_logic" | "error_correction";
   position: CellPosition;
   value: number;
   title: string;
