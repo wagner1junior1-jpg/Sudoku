@@ -28,11 +28,14 @@ export const StatsBar: React.FC<StatsBarProps> = ({
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
   const diffInfo = DIFFICULTY_CONFIG[difficulty];
   const isPaused = gameStatus === "paused";
+  const isLight = currentTheme.category === "light";
+  const dangerText = isLight ? "text-rose-600" : "text-rose-400";
+  const warnText = isLight ? "text-amber-700" : "text-amber-400";
 
   return (
     <div
       id="stats-bar"
-      className={`w-full max-w-md mx-auto px-3 py-1.5 rounded-xl ${currentTheme.cardBg} border flex items-center justify-between gap-2 text-xs select-none shadow-md transition-colors`}
+      className={`${isLight ? "theme-light" : ""} w-full max-w-md mx-auto px-3 py-1.5 rounded-xl ${currentTheme.cardBg} border flex items-center justify-between gap-2 text-xs select-none shadow-md transition-colors`}
     >
       {/* Mistakes Counter */}
       <div className="flex items-center gap-1.5">
@@ -42,11 +45,11 @@ export const StatsBar: React.FC<StatsBarProps> = ({
         <span
           className={`font-mono font-bold text-xs px-2 py-0.5 rounded-md ${
             maxMistakesLimit && mistakes >= 3
-              ? "text-rose-600 dark:text-rose-400 bg-rose-500/20 ring-1 ring-rose-500/40 font-black animate-pulse"
+              ? `${dangerText} bg-rose-500/20 ring-1 ring-rose-500/40 font-black animate-pulse`
               : maxMistakesLimit && mistakes === 2
-              ? "text-amber-600 dark:text-amber-400 bg-amber-500/20 ring-1 ring-amber-500/30 font-black"
+              ? `${warnText} bg-amber-500/20 ring-1 ring-amber-500/30 font-black`
               : mistakes > 0
-              ? "text-amber-500 bg-amber-500/10"
+              ? `${warnText} bg-amber-500/10`
               : `${currentTheme.textColor} ${currentTheme.buttonBg}`
           }`}
         >
@@ -66,7 +69,10 @@ export const StatsBar: React.FC<StatsBarProps> = ({
 
       {/* Stopwatch Timer & Pause Button */}
       <div className="flex items-center gap-1.5">
-        <div className="flex items-center gap-1 font-mono font-bold text-sm text-blue-600 dark:text-blue-400">
+        <div
+          className="flex items-center gap-1 font-mono font-bold text-sm"
+          style={{ color: currentTheme.swatch.accent }}
+        >
           <Clock className={`w-3 h-3 ${currentTheme.textMuted}`} />
           <span>{isPaused ? "--:--" : formatTime(timerSeconds)}</span>
         </div>

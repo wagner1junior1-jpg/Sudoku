@@ -62,11 +62,12 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
     let bgClass = cell.isInitial ? currentTheme.cellInitialBg : currentTheme.cellEmptyBg;
     let extraEffects = "";
 
+    // Festive wave cascading across the solved grid, diagonal by diagonal
+    const waveDelayMs = (r + c) * 60;
+
     if (isCompleted) {
-      // Festive wave cascading across the solved grid
-      const delay = (r + c) * 40;
-      bgClass = "bg-gradient-to-tr from-emerald-500/30 to-blue-500/20 text-emerald-400";
-      extraEffects = "animate-pulse shadow-xs";
+      bgClass = "bg-gradient-to-tr from-emerald-500/30 to-blue-500/20";
+      extraEffects = "animate-win-wave shadow-xs";
     } else if (hasConflict || hasError) {
       bgClass = currentTheme.cellConflictBg;
       extraEffects = "z-20";
@@ -92,8 +93,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
 
 
     if (isHintTarget) {
-      bgClass = "bg-blue-500/60 ring-2 ring-blue-300 animate-pulse z-30";
-    }
+      bgClass = "bg-blue-500/60 ring-2 ring-blue-300 animate-pulse z-30";    }
 
     return {
       bgClass,
@@ -101,7 +101,8 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
       isSelected,
       isSameNum,
       hasError,
-      hasConflict
+      hasConflict,
+      waveDelayMs
     };
   };
 
@@ -134,7 +135,8 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                       isSelected,
                       isSameNum,
                       hasError,
-                      hasConflict
+                      hasConflict,
+                      waveDelayMs
                     } = getCellClasses(r, c);
 
                     return (
@@ -145,6 +147,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                         onClick={() => onCellClick(r, c)}
                         disabled={isPaused}
                         className={`relative flex items-center justify-center p-0 m-0 w-full h-full transition-all duration-100 cursor-pointer ${bgClass} ${extraEffects} outline-none focus:outline-none antialiased touch-manipulation active:scale-[0.97]`}
+                        style={isCompleted ? { animationDelay: `${waveDelayMs}ms` } : undefined}
                         aria-label={`Linha ${r + 1}, Coluna ${c + 1}, Valor ${cell.value || "vazio"}`}
                       >
                         {isPaused ? (
@@ -152,7 +155,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                         ) : cell.value !== 0 ? (
                           // Display placed number with maximum size, crispness and vibrant highlight
                           <span
-                            className={`text-2xl sm:text-3xl md:text-4xl select-none font-sans leading-none transition-transform ${
+                            className={`text-2xl sm:text-3xl md:text-4xl select-none font-['Outfit'] tabular-nums leading-none transition-transform ${
                               isSelected ? "scale-105" : ""
                             } ${
                               hasError || hasConflict
@@ -178,15 +181,20 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                               return (
                                 <div
                                   key={`note-${r}-${c}-${digit}`}
-                                  className="flex items-center justify-center text-[8.5px] sm:text-[11px] leading-none font-bold font-sans"
+                                  className="flex items-center justify-center text-[8.5px] sm:text-[11px] leading-none font-bold font-['Outfit'] tabular-nums"
                                 >
                                   {cell.notes.includes(digit) ? (
                                     <span
-                                      className={`${
+                                      className={
                                         isNoteHighlighted
-                                          ? "bg-blue-500 text-white px-1 py-0.5 rounded font-black scale-125 shadow-xs"
+                                          ? `${currentTheme.sameNumberTextColor} px-[2px] py-px rounded-[3px]`
                                           : currentTheme.notesColor
-                                      }`}
+                                      }
+                                      style={
+                                        isNoteHighlighted
+                                          ? { backgroundColor: currentTheme.swatch.accent }
+                                          : undefined
+                                      }
                                     >
                                       {digit}
                                     </span>

@@ -78,6 +78,8 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onUpdateProfile
 }) => {
   const currentTheme = THEMES[themeId] || THEMES["light-classic"];
+  const isLight = currentTheme.category === "light";
+  const subtleFill = isLight ? "bg-black/10" : "bg-white/10";
   const [playerName, setPlayerName] = useState(userProfile.name);
   const [isEditingName, setIsEditingName] = useState(false);
 
@@ -106,7 +108,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   return (
     <div
       id="home-screen"
-      className={`h-full max-h-full w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between py-3 px-3.5 max-w-md mx-auto select-none overflow-y-auto no-scrollbar font-['Plus_Jakarta_Sans'] transition-colors duration-300 animate-fade-in`}
+      className={`${isLight ? "theme-light" : ""} h-full max-h-full w-full ${currentTheme.bg} ${currentTheme.textColor} flex flex-col justify-between py-3 px-3.5 max-w-md mx-auto select-none overflow-y-auto no-scrollbar font-['Plus_Jakarta_Sans'] transition-colors duration-300 animate-fade-in`}
     >
       {/* Top Header Bar */}
       <header className="flex items-center justify-between gap-2 pt-1 pb-2">
@@ -384,7 +386,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
           </div>
 
           {/* Progress Bar */}
-          <div className="w-full h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden p-0.5">
+          <div className={`w-full h-1.5 rounded-full ${subtleFill} overflow-hidden p-0.5`}>
             <div
               className="h-full rounded-full bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-400 transition-all duration-500"
               style={{ width: `${completionPercent}%` }}
@@ -428,7 +430,7 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
       </main>
 
       {/* Bottom Navigation & Shortcuts Bar */}
-      <footer className="pt-2 pb-1 border-t border-black/10 dark:border-white/10 grid grid-cols-4 gap-1">
+      <footer className={`pt-2 pb-1 border-t ${isLight ? "border-black/10" : "border-white/10"} grid grid-cols-4 gap-1`}>
         {/* Leaderboard */}
         <button
           id="btn-nav-leaderboard"

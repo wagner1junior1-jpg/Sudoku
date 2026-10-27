@@ -40,6 +40,49 @@
   animation: fadeIn 0.15s ease-out forwards;
 }
 
+/* Onda de vitória: cada célula recebe um animation-delay conforme a diagonal (linha + coluna) */
+@keyframes winWave {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  50% {
+    transform: scale(1.08);
+    filter: brightness(1.35);
+  }
+}
+
+.animate-win-wave {
+  animation: winWave 1.2s ease-in-out infinite;
+}
+
+/* Quem prefere menos movimento não vê animações infinitas */
+@media (prefers-reduced-motion: reduce) {
+  .animate-bounce,
+  .animate-pulse,
+  .animate-win-wave {
+    animation: none;
+  }
+}
+
+/*
+ * Temas claros: as telas usam tons -300/-400 pensados para fundo escuro.
+ * Em .theme-light eles são trocados por tons escuros com contraste suficiente.
+ */
+.theme-light .text-slate-100 { color: #0f172a; }
+.theme-light .text-slate-300 { color: #475569; }
+.theme-light .text-slate-400 { color: #64748b; }
+.theme-light .text-blue-400 { color: #1d4ed8; }
+.theme-light .text-blue-500 { color: #2563eb; }
+.theme-light .text-indigo-400 { color: #4f46e5; }
+.theme-light .text-violet-400 { color: #7c3aed; }
+.theme-light .text-pink-400 { color: #db2777; }
+.theme-light .text-rose-400 { color: #e11d48; }
+.theme-light .text-amber-400,
+.theme-light .text-amber-500 { color: #b45309; }
+.theme-light .text-orange-400 { color: #c2410c; }
+.theme-light .text-emerald-400 { color: #047857; }
+
 /* Optimize touch interactions on mobile devices */
 button, input, select {
   -webkit-tap-highlight-color: transparent;

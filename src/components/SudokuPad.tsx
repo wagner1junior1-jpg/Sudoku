@@ -55,7 +55,7 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
   return (
     <div
       id="sudoku-controls-pad"
-      className="w-full max-w-md mx-auto flex flex-col gap-1 select-none"
+      className={`${currentTheme.category === "light" ? "theme-light" : ""} w-full max-w-md mx-auto flex flex-col gap-1 select-none`}
     >
       {/* Mobile Ergonomic Action & Number Pad Container */}
       <div className={`flex flex-col gap-1.5 p-1.5 sm:p-2 rounded-2xl ${currentTheme.cardBg} border shadow-xl`}>
@@ -87,7 +87,7 @@ export const SudokuPad: React.FC<SudokuPadProps> = ({
                 }
                 title={`Número ${num}${isComplete ? " (Completo)" : ` - restam ${9 - placedCount}`}`}
               >
-                <span className="text-2xl sm:text-3xl font-black leading-none">{num}</span>
+                <span className="text-2xl sm:text-3xl font-black font-['Outfit'] leading-none">{num}</span>
                 {placedCount > 0 && !isComplete && (
                   <span className="text-[9px] sm:text-[10px] font-mono opacity-70 mt-0.5 font-extrabold leading-none">
                     {9 - placedCount}
