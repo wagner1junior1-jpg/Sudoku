@@ -4,6 +4,6 @@
     <string name="title_activity_main">Sudoku Master Pro</string>
     <string name="package_name">com.sudokumasterpro.app</string>
     <string name="custom_url_scheme">com.sudokumasterpro.app</string>
-    <!-- ID do APP no AdMob. Este é o ID de TESTE do Google: troque pelo seu antes de publicar. -->
-    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
+    <!-- ID do APP no AdMob (conta do desenvolvedor). -->
+    <string name="admob_app_id">ca-app-pub-1871959449564340~3179663189</string>
 </resources>

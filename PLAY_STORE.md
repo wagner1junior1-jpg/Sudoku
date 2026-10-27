@@ -76,7 +76,7 @@ O app está com os **IDs de TESTE do Google**: mostra anúncios de teste e não 
    (Só dá para vincular à loja depois que o app existir na Play; pode adicionar "sem publicar" e vincular depois.)
 2. Copie o **ID do app** (`ca-app-pub-XXXX~YYYY`) para `android/app/src/main/res/values/strings.xml` (`admob_app_id`).
 3. Crie um bloco de anúncios **Banner** e copie o **ID do bloco** (`ca-app-pub-XXXX/ZZZZ`) para um arquivo `.env.production`
-   na raiz: `VITE_ADMOB_BANNER_ID=ca-app-pub-XXXX/ZZZZ` (está no `.gitignore`). No GitHub Actions, defina o mesmo valor
+   na raiz: `VITE_ADMOB_BANNER_ID=ca-app-pub-XXXX/ZZZZ` (opcional: o ID de produção já é o padrão do código). No GitHub Actions, defina o mesmo valor
    como *variable* e exporte no passo de build.
 4. No AdMob › **Privacidade e mensagens**, crie e **publique** a mensagem de consentimento (GDPR/UMP). Sem ela, usuários
    do EEE/Reino Unido não verão anúncios.

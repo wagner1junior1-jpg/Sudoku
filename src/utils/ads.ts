@@ -8,10 +8,11 @@ import {
 } from "@capacitor-community/admob";
 import { isNativeApp } from "./platform";
 
-// IDs de TESTE do Google. Em produção defina VITE_ADMOB_BANNER_ID (ID do bloco de anúncios)
-// no ambiente de build e troque o admob_app_id em android/app/src/main/res/values/strings.xml.
-const TEST_BANNER_ID = "ca-app-pub-3940256099942544/6300978111";
-const BANNER_ID = (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || TEST_BANNER_ID;
+// ID do bloco de anúncios Banner (AdMob). IDs do AdMob não são segredo.
+// Para testar sem gerar tráfego inválido na conta, compile com VITE_ADMOB_BANNER_ID=ca-app-pub-3940256099942544/6300978111
+// (ID de teste do Google); o ID do app fica em android/app/src/main/res/values/strings.xml.
+const BANNER_ID =
+  (import.meta.env.VITE_ADMOB_BANNER_ID as string | undefined) || "ca-app-pub-1871959449564340/8100817372";
 
 let started = false;
 
@@ -24,11 +25,17 @@ export async function startAdBanner(onHeightChange: (heightPx: number) => void):
   started = true;
 
   try {
-    let consent = await AdMob.requestConsentInfo();
-    if (consent.isConsentFormAvailable && consent.status === AdmobConsentStatus.REQUIRED) {
-      consent = await AdMob.showConsentForm();
+    try {
+      let consent = await AdMob.requestConsentInfo();
+      if (consent.isConsentFormAvailable && consent.status === AdmobConsentStatus.REQUIRED) {
+        consent = await AdMob.showConsentForm();
+      }
+      if (!consent.canRequestAds) return;
+    } catch (consentError) {
+      // Ex.: mensagem de consentimento ainda não publicada no AdMob. O próprio SDK do Google
+      // limita os anúncios onde o consentimento é obrigatório, então seguimos com a inicialização.
+      console.warn("Consentimento (UMP) indisponível:", consentError);
     }
-    if (!consent.canRequestAds) return;
 
     await AdMob.initialize({ maxAdContentRating: MaxAdContentRating.General });
 
