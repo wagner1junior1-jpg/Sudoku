@@ -9,6 +9,8 @@ Pacote: `com.sudokumasterpro.app` · versão atual: `1.0.0` (versionCode `1`)
 2. **Política de privacidade publicada** (exigida pela Play). O arquivo já está em
    `public/politica-de-privacidade.html`; após o deploy na Vercel a URL fica
    `https://sudoku-chi-two.vercel.app/politica-de-privacidade`. Abra no navegador e confirme que carrega antes de enviar à Play.
+   - **Termos de Uso**: `public/termos-de-uso.html` → `https://sudoku-chi-two.vercel.app/termos-de-uso`
+     (informe esse link na Play Console, junto com a política de privacidade).
 3. JDK 21 e Android SDK (ver README).
 
 ## 2. Chave de upload (JÁ GERADA)
