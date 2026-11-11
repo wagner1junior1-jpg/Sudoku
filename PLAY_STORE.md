@@ -1,6 +1,6 @@
 # Publicação na Google Play – Sudoku Master Pro
 
-Pacote: `com.sudokumasterpro.app` · versão atual: `1.0.0` (versionCode `1`)
+Pacote: `com.sudokumasterpro.app` · versão atual: `1.0.1` (versionCode `2`)
 
 ## 1. Pré-requisitos (feitos uma única vez)
 
@@ -32,7 +32,7 @@ npm run cap:sync
 cd android
 ./gradlew bundleRelease
 # saída: android/app/build/outputs/bundle/release/app-release.aab
-# AAB 1.0.0 já gerado e assinado: store/Sudoku-Master-Pro-1.0.0-release.aab
+# AAB 1.0.1 já gerado e assinado: store/Sudoku-Master-Pro-1.0.1-release.aab
 ```
 
 Alternativa na nuvem: configure os secrets `ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_PASSWORD`,
