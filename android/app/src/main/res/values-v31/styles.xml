@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash do sistema (Android 12+): mesma cor do app, sem depender do core-splashscreen -->
+    <style name="AppTheme.NoActionBarLaunch" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowBackground">@color/windowBackgroundDark</item>
+        <item name="android:windowSplashScreenBackground">@color/windowBackgroundDark</item>
+    </style>
+</resources>
