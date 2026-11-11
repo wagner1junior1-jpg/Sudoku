@@ -146,7 +146,7 @@ export const SudokuGrid: React.FC<SudokuGridProps> = ({
                         type="button"
                         onClick={() => onCellClick(r, c)}
                         disabled={isPaused}
-                        className={`relative flex items-center justify-center p-0 m-0 w-full h-full transition-all duration-100 cursor-pointer ${bgClass} ${extraEffects} outline-none focus:outline-none antialiased touch-manipulation active:scale-[0.97]`}
+                        className={`relative flex items-center justify-center p-0 m-0 w-full h-full ${isCompleted ? "" : "transition-all duration-100"} cursor-pointer ${bgClass} ${extraEffects} outline-none focus:outline-none antialiased touch-manipulation active:scale-[0.97]`}
                         style={isCompleted ? { animationDelay: `${waveDelayMs}ms` } : undefined}
                         aria-label={`Linha ${r + 1}, Coluna ${c + 1}, Valor ${cell.value || "vazio"}`}
                       >

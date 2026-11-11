@@ -41,19 +41,18 @@
 }
 
 /* Onda de vitória: cada célula recebe um animation-delay conforme a diagonal (linha + coluna) */
+/* Só transform (sem filter) e com número finito de repetições: leve para a WebView do Android */
 @keyframes winWave {
   0%, 100% {
     transform: scale(1);
-    filter: brightness(1);
   }
   50% {
     transform: scale(1.08);
-    filter: brightness(1.35);
   }
 }
 
 .animate-win-wave {
-  animation: winWave 1.2s ease-in-out infinite;
+  animation: winWave 0.9s ease-in-out 2 both;
 }
 
 /* Quem prefere menos movimento não vê animações infinitas */

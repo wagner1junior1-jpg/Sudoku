@@ -498,6 +498,17 @@ export default function App() {
     }
   }, [gameStatus]);
 
+  // A onda de vitória toca na grade primeiro; o modal de vitória entra logo depois
+  const [winModalReady, setWinModalReady] = useState(false);
+  useEffect(() => {
+    if (gameStatus !== "completed") {
+      setWinModalReady(false);
+      return;
+    }
+    const timer = setTimeout(() => setWinModalReady(true), 450);
+    return () => clearTimeout(timer);
+  }, [gameStatus]);
+
   // Pausa automaticamente quando o app vai para segundo plano
   useEffect(() => {
     const handleVisibility = () => {
@@ -516,6 +527,11 @@ export default function App() {
     clearActiveGame();
     setSavedGame(null);
 
+    // Gravações e conquistas ficam para depois do primeiro quadro da celebração (evita travar a WebView)
+    setTimeout(() => recordVictory(), 120);
+  };
+
+  const recordVictory = () => {
     const finalScore =
       hasContinuedPastLimit || mistakes >= 3
         ? 0
@@ -1152,7 +1168,7 @@ export default function App() {
         />
       )}
 
-      {gameStatus === "completed" && (
+      {gameStatus === "completed" && winModalReady && (
         <WinCelebrationModal
           difficulty={difficulty}
           timeSeconds={timerSeconds}

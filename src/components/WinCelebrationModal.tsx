@@ -72,56 +72,52 @@ export const WinCelebrationModal: React.FC<WinCelebrationModalProps> = ({
   }, [score]);
 
   // Multistage Festive Fireworks & Confetti Cannon Blast
+  // Começa só depois do modal já estar pintado e usa menos partículas, para não travar a WebView
   useEffect(() => {
-    try {
-      // Wave 1: Center blast with primary burst
-      confetti({
-        particleCount: 100,
+    const fire = (options: confetti.Options) => {
+      try {
+        confetti({ disableForReducedMotion: true, ...options });
+      } catch {
+        // Confete é só enfeite
+      }
+    };
+
+    // Wave 1: Center blast with primary burst
+    const t0 = setTimeout(() => {
+      fire({
+        particleCount: 60,
         spread: 70,
         origin: { y: 0.6 },
         colors: ["#3b82f6", "#f59e0b", "#10b981", "#ec4899", "#8b5cf6"]
       });
+    }, 300);
 
-      // Wave 2: Left and right cannons
-      const t1 = setTimeout(() => {
-        confetti({
-          particleCount: 80,
-          angle: 60,
-          spread: 60,
-          origin: { x: 0.05, y: 0.7 },
-          colors: ["#f59e0b", "#fbbf24", "#3b82f6", "#60a5fa"]
-        });
-        confetti({
-          particleCount: 80,
-          angle: 120,
-          spread: 60,
-          origin: { x: 0.95, y: 0.7 },
-          colors: ["#10b981", "#34d399", "#a855f7", "#c084fc"]
-        });
-      }, 350);
+    // Wave 2: Left and right cannons
+    const t1 = setTimeout(() => {
+      fire({
+        particleCount: 45,
+        angle: 60,
+        spread: 60,
+        origin: { x: 0.05, y: 0.7 },
+        colors: ["#f59e0b", "#fbbf24", "#3b82f6", "#60a5fa"]
+      });
+      fire({
+        particleCount: 45,
+        angle: 120,
+        spread: 60,
+        origin: { x: 0.95, y: 0.7 },
+        colors: ["#10b981", "#34d399", "#a855f7", "#c084fc"]
+      });
+    }, 750);
 
-      // Wave 3: Star shower & golden glitter
-      const t2 = setTimeout(() => {
-        confetti({
-          particleCount: 60,
-          spread: 100,
-          origin: { y: 0.4 },
-          shapes: ["star", "circle"],
-          colors: ["#ffd700", "#ffae19", "#ffffff", "#38bdf8"]
-        });
-      }, 750);
-
-      return () => {
-        clearTimeout(t1);
-        clearTimeout(t2);
-      };
-    } catch {
-      // Fallback
-    }
+    return () => {
+      clearTimeout(t0);
+      clearTimeout(t1);
+    };
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-3 overflow-y-auto animate-fade-in">
+    <div className="fixed inset-0 z-50 bg-black/85 flex items-center justify-center p-3 overflow-y-auto animate-fade-in">
       <div
         className={`w-full max-w-sm p-5 rounded-2xl ${currentTheme.cardBg} border shadow-2xl flex flex-col items-center gap-3.5 text-center animate-scale-up`}
       >
